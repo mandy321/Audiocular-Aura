@@ -923,11 +923,14 @@ body.aura-app-theme {
 /* --- AutoEq Online Search Card & Dropdown --- */
 .autoeq-card {
   grid-column: span 1;
+  position: relative;
+  z-index: 10;
 }
 
 .autoeq-search-wrapper {
   position: relative;
   width: 100%;
+  z-index: 20;
 }
 
 .search-input-container {
