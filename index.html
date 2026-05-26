@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="./assets/index-afe3c9d1.js"></script>
-  <link rel="stylesheet" href="./assets/index-a39ae889.css">
+  <script type="module" crossorigin src="./assets/index-d626262d.js"></script>
+  <link rel="stylesheet" href="./assets/index-47146d4d.css">
 </head>
 
 <body class="aura-app-theme">
@@ -153,6 +153,146 @@
           </div>
         </section>
       </div>
+
+      <!-- Device Utility Controls Card -->
+      <section class="control-card utility-card-full">
+        <div class="card-header">
+          <h2 class="card-title">⚙️ Device Utility Controls</h2>
+          <p class="card-subtitle">Configure advanced hardware-level DAC parameters, amplifier states, and microphone gain.</p>
+        </div>
+        
+        <div class="utility-grid">
+          <!-- Column 1: DAC Configuration -->
+          <div class="utility-col">
+            <h3 class="utility-sub-title">DAC Configuration</h3>
+            
+            <!-- Filter Type -->
+            <div class="control-group">
+              <label for="selFilterType" class="control-label-row">
+                <span>Filter Type</span>
+                <span id="filterTypeVal" class="control-value">FAST-LL (Low Latency)</span>
+              </label>
+              <select id="selFilterType" class="premium-select" disabled>
+                <option value="FAST-LL">FAST-LL (Low Latency)</option>
+                <option value="FAST-PC">FAST-PC (Phase Comp)</option>
+                <option value="Slow-LL">Slow-LL (Low Latency)</option>
+                <option value="Slow-PC">Slow-PC (Phase Comp)</option>
+                <option value="NON-OS">NON-OS (Non-Oversampling)</option>
+              </select>
+            </div>
+            
+            <!-- Filter Description -->
+            <div id="filterDescBox" class="filter-description-box">
+              <strong>FAST-LL (Low Latency):</strong> Minimizes pre-ringing (echo before notes) and provides the lowest latency. Warm, punchy, and thick sound. Best for gaming and videos.
+            </div>
+
+            <!-- Amp Mode -->
+            <div class="control-group-row">
+              <div class="toggle-details">
+                <span class="control-label">Amp Mode</span>
+                <span class="toggle-desc">Class H vs Class AB</span>
+              </div>
+              <div class="toggle-wrapper">
+                <span class="toggle-label-left" id="ampLabelClassH">Class H</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleAmpMode" disabled>
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label-right active" id="ampLabelClassAB">Class AB</span>
+              </div>
+            </div>
+
+            <!-- Gain Mode -->
+            <div class="control-group-row">
+              <div class="toggle-details">
+                <span class="control-label">Gain Mode</span>
+                <span class="toggle-desc">Output Power Level</span>
+              </div>
+              <div class="toggle-wrapper">
+                <span class="toggle-label-left active" id="gainLabelLow">Low</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleGainMode" disabled>
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label-right" id="gainLabelHigh">High</span>
+              </div>
+            </div>
+
+            <!-- Channel Balance -->
+            <div class="control-group">
+              <label for="sliderBalance" class="control-label-row">
+                <span>Channel Balance</span>
+                <span id="balanceVal" class="control-value">0 (Center)</span>
+              </label>
+              <input type="range" id="sliderBalance" min="-15" max="15" step="1" value="0" class="premium-range" disabled>
+              <div class="balance-labels">
+                <span>Left (-15)</span>
+                <span>Center (0)</span>
+                <span>Right (+15)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Microphone Control -->
+          <div class="utility-col">
+            <h3 class="utility-sub-title">Microphone Control</h3>
+            
+            <!-- Monitoring Toggle -->
+            <div class="control-group-row">
+              <div class="toggle-details">
+                <span class="control-label">Monitoring</span>
+                <span class="toggle-desc">Zero-Latency Mic Loopback</span>
+              </div>
+              <div class="toggle-wrapper">
+                <span class="toggle-label-left active" id="micMonitorStatus">Monitoring Off</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleMicMonitor" disabled>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mic Visual Levels (Aesthetic Bars) -->
+            <div class="control-group">
+              <span class="control-label">Input Levels</span>
+              <div class="level-meters">
+                <div class="meter-channel">
+                  <span class="meter-label">L</span>
+                  <div class="meter-bar-container">
+                    <div class="meter-bar" id="meterL"></div>
+                  </div>
+                </div>
+                <div class="meter-channel">
+                  <span class="meter-label">R</span>
+                  <div class="meter-bar-container">
+                    <div class="meter-bar" id="meterR"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mic Gain Slider -->
+            <div class="control-group">
+              <label for="sliderMicGain" class="control-label-row">
+                <span>Microphone Gain</span>
+                <span id="micGainVal" class="control-value">0 dB</span>
+              </label>
+              <input type="range" id="sliderMicGain" min="-15" max="15" step="1" value="0" class="premium-range" disabled>
+              <div class="balance-labels">
+                <span>-15 dB</span>
+                <span>0 dB</span>
+                <span>+15 dB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Bottom Actions -->
+        <div class="utility-footer">
+          <button id="btnFactoryReset" class="btn btn-secondary reset" disabled>🔄 FULL FACTORY RESET</button>
+          <button id="btnGetFw" class="btn btn-accent action" disabled>⚡ GET FW VERSION</button>
+        </div>
+      </section>
 
       <!-- Collapsible Console/Terminal Log Panel -->
       <section class="control-card log-card">
