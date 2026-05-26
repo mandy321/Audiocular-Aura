@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="./assets/index-7e2000e3.js"></script>
-  <link rel="stylesheet" href="./assets/index-11c3430d.css">
+  <script type="module" crossorigin src="./assets/index-e0416bb4.js"></script>
+  <link rel="stylesheet" href="./assets/index-918bb875.css">
 </head>
 
 <body class="aura-app-theme">
@@ -86,52 +86,73 @@
         </div>
       </section>
 
-      <!-- Preset and Preset File Utilities Card -->
-      <section class="control-card utilities-card">
+      <!-- Visualizer Graph Card -->
+      <section class="control-card visualizer-card">
         <div class="card-header">
-          <h2 class="card-title">Preset Utilities</h2>
+          <h2 class="card-title">Real-Time PEQ Response Curve</h2>
+          <p class="card-subtitle">Drag the interactive handles to adjust frequency and gain in real-time.</p>
         </div>
-        <div class="button-group flex-wrap">
-          <button id="btnReset" class="btn btn-secondary reset" disabled aria-label="Reset EQ to flat settings">RESET DEFAULTS</button>
-          <button id="btnImport" class="btn btn-secondary" aria-label="Import EQ Preset file">IMPORT PRESET</button>
-          <button id="btnExport" class="btn btn-secondary" disabled aria-label="Export EQ Preset to file">EXPORT PRESET</button>
-          <input type="file" id="fileInput" accept=".json,.txt" style="display: none;" aria-hidden="true">
+        <div class="canvas-wrapper-full">
+          <canvas id="eqCanvas" class="peq-canvas"></canvas>
         </div>
       </section>
 
-      <!-- AutoEq Online Database Card -->
-      <section class="control-card autoeq-card">
+      <!-- EQ Strips Card (Showing all 8 bands side-by-side) -->
+      <section class="control-card strips-card">
         <div class="card-header">
-          <h2 class="card-title">AutoEq Online Database</h2>
-          <p class="card-subtitle">Search and apply settings for thousands of headphones & IEMs.</p>
+          <h2 class="card-title">EQ Bands Controller</h2>
+          <p class="card-subtitle">Adjust parametric values for each of the 8 DSP bands.</p>
         </div>
-        <div class="autoeq-search-wrapper">
-          <div class="search-input-container">
-            <input type="text" id="autoeqSearch" class="premium-input" placeholder="Search headphone model... (e.g. Zero RED)" autocomplete="off">
-            <button id="btnRefreshAutoEq" class="btn btn-secondary-icon" title="Force refresh database index" aria-label="Refresh database">🔄</button>
+        <div id="eqStrips" class="eq-strips-grid">
+          <!-- Rendered dynamically by fn.ts -->
+        </div>
+      </section>
+
+      <!-- Bottom Utilities Grid -->
+      <div class="bottom-grid">
+        <!-- Preset and Preset File Utilities Card -->
+        <section class="control-card utilities-card">
+          <div class="card-header">
+            <h2 class="card-title">Preset Utilities</h2>
+            <p class="card-subtitle">Import or export preset profiles.</p>
           </div>
-          <div id="autoeqSearchResults" class="search-dropdown hidden">
-            <!-- Results will be injected here -->
+          <div class="button-group flex-wrap">
+            <button id="btnReset" class="btn btn-secondary reset" disabled aria-label="Reset EQ to flat settings">RESET DEFAULTS</button>
+            <button id="btnImport" class="btn btn-secondary" aria-label="Import EQ Preset file">IMPORT PRESET</button>
+            <button id="btnExport" class="btn btn-secondary" disabled aria-label="Export EQ Preset to file">EXPORT PRESET</button>
+            <input type="file" id="fileInput" accept=".json,.txt" style="display: none;" aria-hidden="true">
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Interactive PEQ Visualizer Card (Visualizer canvas and sliders will be rendered inside) -->
-      <section id="eqContainer" class="eq-visualizer-card">
-        <!-- Rendered by peq.ts dynamically -->
-      </section>
+        <!-- AutoEq Online Database Card -->
+        <section class="control-card autoeq-card">
+          <div class="card-header">
+            <h2 class="card-title">AutoEq Online Database</h2>
+            <p class="card-subtitle">Search and apply settings for thousands of headphones & IEMs.</p>
+          </div>
+          <div class="autoeq-search-wrapper">
+            <div class="search-input-container">
+              <input type="text" id="autoeqSearch" class="premium-input" placeholder="Search headphone model... (e.g. Zero RED)" autocomplete="off">
+              <button id="btnRefreshAutoEq" class="btn btn-secondary-icon" title="Force refresh database index" aria-label="Refresh database">🔄</button>
+            </div>
+            <div id="autoeqSearchResults" class="search-dropdown hidden">
+              <!-- Results will be injected here -->
+            </div>
+          </div>
+        </section>
 
-      <!-- Hardware Flashing Control Panel -->
-      <section class="control-card sync-card">
-        <div class="card-header">
-          <h2 class="card-title">Hardware Memory Controls</h2>
-          <p class="card-subtitle">Apply settings in real-time or flash them permanently.</p>
-        </div>
-        <div class="sync-actions">
-          <button id="btnSync" class="btn btn-accent action" disabled aria-label="Sync current EQ settings to DAC RAM">SYNC TO RAM (APPLY)</button>
-          <button id="btnFlash" class="btn btn-highlight action" disabled aria-label="Write current EQ settings permanently to DAC Flash">SAVE TO FLASH (PERMANENT)</button>
-        </div>
-      </section>
+        <!-- Hardware Flashing Control Panel -->
+        <section class="control-card sync-card">
+          <div class="card-header">
+            <h2 class="card-title">Hardware Memory Controls</h2>
+            <p class="card-subtitle">Apply settings in real-time or flash them permanently.</p>
+          </div>
+          <div class="sync-actions">
+            <button id="btnSync" class="btn btn-accent action" disabled aria-label="Sync current EQ settings to DAC RAM">SYNC TO RAM (APPLY)</button>
+            <button id="btnFlash" class="btn btn-highlight action" disabled aria-label="Write current EQ settings permanently to DAC Flash">SAVE TO FLASH (PERMANENT)</button>
+          </div>
+        </section>
+      </div>
 
       <!-- Collapsible Console/Terminal Log Panel -->
       <section class="control-card log-card">
