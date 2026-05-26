@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   
   <!-- SEO Tags -->
-  <title>AuraPEQ - Audiocular Aura DSP Parametric Equalizer Controller</title>
-  <meta name="description" content="Unlock and configure the hardware-level 8-band Parametric Equalizer (PEQ) on your Audiocular Aura DAC (CS43131 + SGM8262 + CB5100). Save presets permanently to the internal DSP flash memory." />
-  <meta name="keywords" content="Audiocular Aura, CS43131, SGM8262, CB5100, Parametric EQ, Hardware PEQ, WebHID, DSP Equalizer, DAC config" />
+  <title>AuraPEQ - Audiocular Aura & Multi-DAC DSP Parametric Equalizer Controller</title>
+  <meta name="description" content="Unlock and configure the hardware-level 8-band Parametric Equalizer (PEQ) on your Audiocular Aura, Moondrop, FiiO, and other compatible DSP-enabled DACs. Save presets permanently to the internal DSP flash memory." />
+  <meta name="keywords" content="Audiocular Aura, Moondrop, FiiO, Tanchjim, JCally, CS43131, CT7601, CB5100, Parametric EQ, Hardware PEQ, WebHID, DSP Equalizer, DAC config" />
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,10 +23,10 @@
     <header class="app-header">
       <div class="logo-area">
         <h1 class="main-title">🎧 AuraPEQ</h1>
-        <p class="subtitle">Audiocular Aura Hardware DSP Equalizer Controller</p>
+        <p class="subtitle">Audiocular Aura & Multi-DAC Hardware DSP Controller</p>
       </div>
       <div class="chipset-badge">
-        <span>CS43131 + SGM8262 + CB5100</span>
+        <span>Audiocular (CB5100) • Moondrop (CT7601) • FiiO DSP</span>
       </div>
     </header>
 
@@ -69,7 +69,7 @@
         <div class="custom-usb-accordion">
           <button id="btnToggleCustomUsb" class="btn btn-secondary-text" aria-label="Toggle Custom USB Settings">Show Custom USB Options ▼</button>
           <div id="customUsbConfig" class="accordion-content hidden">
-            <p class="accordion-description">If your Audiocular Aura is not detected automatically, enter its USB hex identifiers below to override connections:</p>
+            <p class="accordion-description">If your DAC is not detected automatically, or if you are using another compatible DSP-enabled device (Savitech, Moondrop, Tanchjim, FiiO), enter its USB hex identifiers below to override connections:</p>
             <div class="input-row">
               <div class="input-field">
                 <label for="customVid">Vendor ID (Hex)</label>

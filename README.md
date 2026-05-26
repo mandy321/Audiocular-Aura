@@ -1,8 +1,8 @@
 # 🎧 AuraPEQ
 
-> A premium browser-based controller to unlock and configure the hardware-level 8-band Parametric Equalizer (PEQ) on the **Audiocular Aura** DAC.
+> A premium browser-based controller to unlock and configure the hardware-level 8-band Parametric Equalizer (PEQ) on the **Audiocular Aura** and other compatible multi-brand DSP DACs.
 
-AuraPEQ communicates directly with the **Savitech CB5100** USB audio bridge chip inside the Audiocular Aura DAC (CS43131 + SGM8262 audio architecture) via the **WebHID API**. This allows you to configure a true hardware-level 8-band PEQ. All DSP math is calculated directly on the DAC hardware rather than running as a software overlay, saving system resources and preserving native audio fidelity.
+AuraPEQ communicates directly with the **Savitech CB5100**, **Comtrue (CT7601)**, or **FiiO** USB audio bridge and DSP chips via the **WebHID API**. This allows you to configure a true hardware-level 8-band PEQ. All DSP math is calculated directly on the DAC hardware rather than running as a software overlay, saving system resources and preserving native audio fidelity.
 
 Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.github.io/Audiocular-Aura/)**
 
@@ -19,7 +19,7 @@ Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.g
 * **Memory Persistence**:
   * **Sync to RAM**: Apply settings instantly in real-time to hear your changes.
   * **Save to Flash**: Write the settings permanently to the DAC's internal flash memory so they persist when you connect the DAC to other devices (like phones, tablets, or consoles).
-* **Universal USB Override Connection**: If your specific DAC revision or batch reports different USB identification codes, you can input a custom hex Vendor ID (VID) and Product ID (PID) to bypass connections.
+* **Universal USB Override Connection**: If your specific DAC revision or batch reports different USB identification codes, or if you are using another compatible brand (Moondrop, Tanchjim, FiiO, JCally, Fosi, iBasso), you can input a custom hex Vendor ID (VID) and Product ID (PID) to bypass connections.
 
 ---
 
@@ -29,6 +29,24 @@ Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.g
 * **Styling**: Premium Glassmorphic Vanilla CSS (No heavy framework overlays).
 * **Build Tool**: Vite v4 (configured with relative base paths for portable deployments).
 * **Communication**: WebHID API.
+
+---
+
+## 🔌 Hardware Compatibility & Chipsets
+
+AuraPEQ features a multi-protocol hardware communication layer that supports several popular DSP chipsets and audio brands out-of-the-box:
+
+| Chipset / Protocol | Key Brands & Models | Connection Details |
+| :--- | :--- | :--- |
+| **Savitech (Walkplay)** | Audiocular Aura, JCally (Generic), Fosi, iBasso | Uses standard Q30 fixed-point IIR filter calculations. |
+| **Moondrop / Comtrue** | Moondrop, Tanchjim (CT7601 chips) | Uses specialized double-precision biquad coefficient encoding. |
+| **FiiO** | FiiO (JA11, KA17, etc.) | Decodes gain, frequency, and Q parameters to FiiO's filter parameters report formats. |
+
+### How to use with other DACs:
+1. If your DAC uses one of the supported chipsets listed above, connect it to your computer.
+2. In the Web App, click **Show Custom USB Options**.
+3. Input your DAC's hexadecimal **Vendor ID (VID)** and **Product ID (PID)**.
+4. Click **CONNECT DAC**. The app will automatically detect which communication protocol to use based on the Vendor ID!
 
 ---
 
