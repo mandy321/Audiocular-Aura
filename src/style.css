@@ -919,3 +919,118 @@ body.aura-app-theme {
     transform: translateY(0);
   }
 }
+
+/* --- AutoEq Online Search Card & Dropdown --- */
+.autoeq-card {
+  grid-column: span 1;
+}
+
+.autoeq-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input-container {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.search-input-container .premium-input {
+  flex: 1;
+}
+
+.premium-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: all var(--transition-speed);
+}
+
+.premium-input:focus {
+  border-color: var(--color-violet);
+  box-shadow: 0 0 8px var(--color-violet-glow);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary-icon {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-speed);
+}
+
+.btn-secondary-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-hover);
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  animation: slideDown 0.2s ease-out;
+}
+
+.search-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.search-item:last-child {
+  border-bottom: none;
+}
+
+.search-item:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #ffffff;
+  padding-left: 18px;
+}
+
+.search-no-results {
+  padding: 14px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.search-loading {
+  padding: 14px;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  text-align: center;
+  animation: pulse-glow 1.5s infinite;
+}
+
+@keyframes pulse-glow {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

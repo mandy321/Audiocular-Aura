@@ -157,3 +157,26 @@ export async function importProfile(e: Event) {
 	};
 	reader.readAsText(file);
 }
+
+/**
+ * Load EQ profile from raw text content
+ * @param content The raw txt preset content
+ */
+export function loadProfileFromText(content: string) {
+	try {
+		const profile = parseTextProfile(content);
+
+		// Update internal state
+		setEqState(profile.bands);
+		setGlobalGainState(profile.globalGain);
+
+		// Update UI and send preamp packet
+		updateGlobalGain(profile.globalGain);
+		renderUI(profile.bands);
+
+		log("AutoEq preset loaded. Click 'SYNC TO RAM' to apply settings to the DAC.");
+	} catch (err) {
+		log(`AutoEq Parsing Error: ${(err as Error).message}`);
+		console.error(err);
+	}
+}
