@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="./assets/index-1dbab82f.js"></script>
-  <link rel="stylesheet" href="./assets/index-320e16b4.css">
+  <script type="module" crossorigin src="./assets/index-7e2000e3.js"></script>
+  <link rel="stylesheet" href="./assets/index-11c3430d.css">
 </head>
 
 <body class="aura-app-theme">
@@ -96,6 +96,23 @@
           <button id="btnImport" class="btn btn-secondary" aria-label="Import EQ Preset file">IMPORT PRESET</button>
           <button id="btnExport" class="btn btn-secondary" disabled aria-label="Export EQ Preset to file">EXPORT PRESET</button>
           <input type="file" id="fileInput" accept=".json,.txt" style="display: none;" aria-hidden="true">
+        </div>
+      </section>
+
+      <!-- AutoEq Online Database Card -->
+      <section class="control-card autoeq-card">
+        <div class="card-header">
+          <h2 class="card-title">AutoEq Online Database</h2>
+          <p class="card-subtitle">Search and apply settings for thousands of headphones & IEMs.</p>
+        </div>
+        <div class="autoeq-search-wrapper">
+          <div class="search-input-container">
+            <input type="text" id="autoeqSearch" class="premium-input" placeholder="Search headphone model... (e.g. Zero RED)" autocomplete="off">
+            <button id="btnRefreshAutoEq" class="btn btn-secondary-icon" title="Force refresh database index" aria-label="Refresh database">🔄</button>
+          </div>
+          <div id="autoeqSearchResults" class="search-dropdown hidden">
+            <!-- Results will be injected here -->
+          </div>
         </div>
       </section>
 
