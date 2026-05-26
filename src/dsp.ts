@@ -80,7 +80,7 @@ export async function readDeviceParams(device: HIDDevice) {
 	]);
 	await delay(50);
 
-	// Request all 8 bands
+	// Request all 10 bands
 	for (let i = 0; i < NUM_BANDS; i++) {
 		await sendPacketSavitech(device, [
 			CMD_SAVI.READ,

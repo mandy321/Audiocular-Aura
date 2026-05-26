@@ -67,7 +67,7 @@ export function setGlobalGainState(gainState: number) {
 }
 
 /**
- * Generate default flat 8-band EQ state
+ * Generate default flat 10-band EQ state
  */
 export function defaultEqState(): EQ {
 	return DEFAULT_FREQS.map((freq, i) => ({

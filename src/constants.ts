@@ -2,7 +2,7 @@
  * CONSTANTS
  */
 export const PACKET_SIZE = 63;
-export const NUM_BANDS = 8;
+export const NUM_BANDS = 10;
 
 export const REPORT_ID_DEFAULT = 75; // 0x4B (Savitech / Comtrue default)
 export const REPORT_ID_FIIO = 7;     // FiiO default
@@ -54,7 +54,7 @@ export const CMD_FIIO = {
 /**
  * DEFAULT SETTINGS
  */
-export const DEFAULT_FREQS = [40, 100, 250, 500, 1000, 3000, 8000, 16000];
+export const DEFAULT_FREQS = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
 export const DEFAULT_LABELS = [
 	"Sub-Bass",
 	"Bass",
@@ -62,6 +62,8 @@ export const DEFAULT_LABELS = [
 	"Mids",
 	"Mids",
 	"High-Mids",
+	"High-Mids",
+	"Presence",
 	"Presence",
 	"Air",
 ];

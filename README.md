@@ -1,8 +1,8 @@
 # 🎧 AuraPEQ
 
-> A premium browser-based controller to unlock and configure the hardware-level 8-band Parametric Equalizer (PEQ) on the **Audiocular Aura** and other compatible multi-brand DSP DACs.
+> A premium browser-based controller to unlock and configure the hardware-level 10-band Parametric Equalizer (PEQ) on the **Audiocular Aura** and other compatible multi-brand DSP DACs.
 
-AuraPEQ communicates directly with the **Savitech CB5100**, **Comtrue (CT7601)**, or **FiiO** USB audio bridge and DSP chips via the **WebHID API**. This allows you to configure a true hardware-level 8-band PEQ. All DSP math is calculated directly on the DAC hardware rather than running as a software overlay, saving system resources and preserving native audio fidelity.
+AuraPEQ communicates directly with the **Savitech CB5100**, **Comtrue (CT7601)**, or **FiiO** USB audio bridge and DSP chips via the **WebHID API**. This allows you to configure a true hardware-level 10-band PEQ. All DSP math is calculated directly on the DAC hardware rather than running as a software overlay, saving system resources and preserving native audio fidelity.
 
 Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.github.io/Audiocular-Aura/)**
 
@@ -12,7 +12,7 @@ Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.g
 
 * **Hardware-Level DSP Processing**: The audio filter logic is processed directly inside the DAC's integrated DSP chip.
 * **Interactive Frequency Graph**: Drag and drop visual handles on a logarithmic grid to adjust Gain and Frequency, with real-time cumulative curve tracing.
-* **8 Configurable Bands**: Individual frequency, gain, and Q (filter width) settings supporting Peak (`PK`), Low Shelf (`LSQ`), and High Shelf (`HSQ`) filter types.
+* **10 Configurable Bands**: Individual frequency, gain, and Q (filter width) settings supporting Peak (`PK`), Low Shelf (`LSQ`), and High Shelf (`HSQ`) filter types.
 * **Profile Import/Export**:
   * Save and load settings using standard `.json` configuration files.
   * Import standard **AutoEq text profiles** (compatible with presets exported from [AutoEq.app](https://autoeq.app) or [Squiglink](https://squig.link)).

@@ -1049,21 +1049,20 @@ body.aura-app-theme {
   overflow: hidden;
 }
 
-/* --- EQ Strips Grid --- */
 .eq-strips-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   gap: 12px;
   width: 100%;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .eq-strips-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .eq-strips-grid {
     grid-template-columns: repeat(2, 1fr);
   }
