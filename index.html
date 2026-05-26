@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <!-- SEO Tags -->
+  <title>AuraPEQ - Audiocular Aura DSP Parametric Equalizer Controller</title>
+  <meta name="description" content="Unlock and configure the hardware-level 8-band Parametric Equalizer (PEQ) on your Audiocular Aura DAC (CS43131 + SGM8262 + CB5100). Save presets permanently to the internal DSP flash memory." />
+  <meta name="keywords" content="Audiocular Aura, CS43131, SGM8262, CB5100, Parametric EQ, Hardware PEQ, WebHID, DSP Equalizer, DAC config" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="./assets/index-8351cc34.js"></script>
+  <link rel="stylesheet" href="./assets/index-320e16b4.css">
+</head>
+
+<body class="aura-app-theme">
+  <!-- Core Wrapper -->
+  <div class="app-wrapper">
+    
+    <!-- Top Branding Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <h1 class="main-title">🎧 AuraPEQ</h1>
+        <p class="subtitle">Audiocular Aura Hardware DSP Equalizer Controller</p>
+      </div>
+      <div class="chipset-badge">
+        <span>CS43131 + SGM8262 + CB5100</span>
+      </div>
+    </header>
+
+    <!-- Browser Support Alert (WebHID verification banner) -->
+    <div id="hidSupportAlert" class="alert-banner hidden">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <strong class="alert-title">Browser Compatibility Warning</strong>
+        <span class="alert-text">WebHID is not supported by your current browser. To write settings directly to your Audiocular Aura DAC hardware, please use a desktop Chromium-based browser like Google Chrome, Microsoft Edge, Opera, or Brave. You can still test the interactive EQ visualizer and import/export presets in Demo Mode below.</span>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid Container -->
+    <main class="dashboard-grid">
+      
+      <!-- Top Control Bar Card -->
+      <section class="control-card connection-card">
+        <!-- Connection Controls -->
+        <div class="control-row flex-wrap">
+          <div class="connection-group">
+            <button id="btnConnect" class="btn btn-primary" aria-label="Connect to Audiocular Aura DAC">CONNECT DAC</button>
+            <div id="disconnectSection" class="disconnect-wrapper" style="display: none;">
+              <button id="btnDisconnect" class="btn btn-danger" aria-label="Disconnect DAC">DISCONNECT</button>
+            </div>
+            <span id="statusBadge" class="badge badge-offline">OFFLINE</span>
+            <span id="fwVersion" class="fw-text"></span>
+          </div>
+
+          <!-- Preamp Gain -->
+          <div class="preamp-group">
+            <div class="preamp-labels">
+              <span class="preamp-title">Pre-Amp Gain</span>
+              <span id="globalGainDisplay" class="preamp-value">0 dB</span>
+            </div>
+            <input type="range" id="globalGainSlider" min="-20" max="10" step="1" value="0" class="preamp-slider" disabled aria-label="Adjust Pre-Amp Gain">
+          </div>
+        </div>
+
+        <!-- Custom USB Settings Accordion Form -->
+        <div class="custom-usb-accordion">
+          <button id="btnToggleCustomUsb" class="btn btn-secondary-text" aria-label="Toggle Custom USB Settings">Show Custom USB Options ▼</button>
+          <div id="customUsbConfig" class="accordion-content hidden">
+            <p class="accordion-description">If your Audiocular Aura is not detected automatically, enter its USB hex identifiers below to override connections:</p>
+            <div class="input-row">
+              <div class="input-field">
+                <label for="customVid">Vendor ID (Hex)</label>
+                <input type="text" id="customVid" placeholder="e.g. 262a" maxlength="6">
+              </div>
+              <div class="input-field">
+                <label for="customPid">Product ID (Hex)</label>
+                <input type="text" id="customPid" placeholder="e.g. 104b" maxlength="6">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preset and Preset File Utilities Card -->
+      <section class="control-card utilities-card">
+        <div class="card-header">
+          <h2 class="card-title">Preset Utilities</h2>
+        </div>
+        <div class="button-group flex-wrap">
+          <button id="btnReset" class="btn btn-secondary reset" disabled aria-label="Reset EQ to flat settings">RESET DEFAULTS</button>
+          <button id="btnImport" class="btn btn-secondary" aria-label="Import EQ Preset file">IMPORT PRESET</button>
+          <button id="btnExport" class="btn btn-secondary" disabled aria-label="Export EQ Preset to file">EXPORT PRESET</button>
+          <input type="file" id="fileInput" accept=".json,.txt" style="display: none;" aria-hidden="true">
+        </div>
+      </section>
+
+      <!-- Interactive PEQ Visualizer Card (Visualizer canvas and sliders will be rendered inside) -->
+      <section id="eqContainer" class="eq-visualizer-card">
+        <!-- Rendered by peq.ts dynamically -->
+      </section>
+
+      <!-- Hardware Flashing Control Panel -->
+      <section class="control-card sync-card">
+        <div class="card-header">
+          <h2 class="card-title">Hardware Memory Controls</h2>
+          <p class="card-subtitle">Apply settings in real-time or flash them permanently.</p>
+        </div>
+        <div class="sync-actions">
+          <button id="btnSync" class="btn btn-accent action" disabled aria-label="Sync current EQ settings to DAC RAM">SYNC TO RAM (APPLY)</button>
+          <button id="btnFlash" class="btn btn-highlight action" disabled aria-label="Write current EQ settings permanently to DAC Flash">SAVE TO FLASH (PERMANENT)</button>
+        </div>
+      </section>
+
+      <!-- Collapsible Console/Terminal Log Panel -->
+      <section class="control-card log-card">
+        <div class="log-header">
+          <h3 class="log-title">System Messages Console</h3>
+          <button class="btn btn-clear-log" onclick="document.getElementById('logConsole').innerHTML = '<div>Console cleared.</div>'" aria-label="Clear Log Console">Clear</button>
+        </div>
+        <div id="logConsole" class="log-body">Ready to connect...</div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2026 AuraPEQ. Designed for the Audiocular Aura (CS43131 / SGM8262 / CB5100 chipset). Powered by WebHID.</p>
+    </footer>
+
+  </div>
+
+  <!-- Script initialization -->
+  
+  
+  <!-- WebHID Support Verification Script -->
+  <script>
+    if (!navigator.hid) {
+      document.getElementById('hidSupportAlert').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
