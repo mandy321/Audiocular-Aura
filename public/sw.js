@@ -35,6 +35,11 @@ self.addEventListener("activate", (event) => {
 
 // Fetch Event - Cache First / Network Fallback with Dynamic Caching
 self.addEventListener("fetch", (event) => {
+	// Only handle GET requests (Cache API does not support POST/PUT etc.)
+	if (event.request.method !== "GET") {
+		return;
+	}
+
 	// Only handle HTTP/HTTPS requests (bypasses chrome-extension etc.)
 	if (!event.request.url.startsWith(self.location.origin)) {
 		return;

@@ -598,8 +598,19 @@ function renderSupportedDacsList() {
 // Register Progressive Web App Service Worker
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
+		// Calculate the base path dynamically to avoid trailing slash issues in GitHub Pages subfolders
+		const basePath = window.location.pathname.endsWith("/")
+			? window.location.pathname
+			: window.location.pathname + "/";
+
+		// Update manifest link dynamically to use the absolute-relative path
+		const manifestLink = document.querySelector('link[rel="manifest"]') as HTMLLinkElement;
+		if (manifestLink) {
+			manifestLink.href = basePath + "manifest.json";
+		}
+
 		navigator.serviceWorker
-			.register("./sw.js")
+			.register(basePath + "sw.js")
 			.then((reg) => {
 				console.log("[PWA] Service Worker registered successfully: ", reg.scope);
 			})
