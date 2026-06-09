@@ -6,8 +6,8 @@ import type { Band } from "./main.ts";
 const CONFIG = {
 	minFreq: 20,
 	maxFreq: 20000,
-	minGain: -20,
-	gainRange: 20,
+	minGain: -12,
+	gainRange: 12,
 	padding: 40,
 };
 
@@ -388,20 +388,26 @@ export function renderPEQ(
 			if (draggingIndex === null || !canvas) return;
 
 			const rect = canvas.getBoundingClientRect();
-			const relX = e.clientX - rect.left;
-			const relY = e.clientY - rect.top;
+			const w = (canvas as any).logicalWidth || rect.width;
+			const h = (canvas as any).logicalHeight || rect.height;
+
+			const scaleX = w / rect.width;
+			const scaleY = h / rect.height;
+
+			const relX = (e.clientX - rect.left) * scaleX;
+			const relY = (e.clientY - rect.top) * scaleY;
 
 			const clampedX = Math.max(
 				CONFIG.padding,
-				Math.min(rect.width - CONFIG.padding, relX),
+				Math.min(w - CONFIG.padding, relX),
 			);
 			const clampedY = Math.max(
 				CONFIG.padding,
-				Math.min(rect.height - CONFIG.padding, relY),
+				Math.min(h - CONFIG.padding, relY),
 			);
 
-			const freq = Math.round(xToFreq(clampedX, rect.width));
-			const gain = Math.round(yToGain(clampedY, rect.height) * 10) / 10;
+			const freq = Math.round(xToFreq(clampedX, w));
+			const gain = Math.round(yToGain(clampedY, h) * 10) / 10;
 
 			// Limit gain range within -12 to 12
 			const clampedGain = Math.max(-12, Math.min(12, gain));
