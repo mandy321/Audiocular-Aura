@@ -30,13 +30,6 @@
       "type": "image/jpeg",
       "form_factor": "wide",
       "label": "AuraPEQ Desktop Dashboard"
-    },
-    {
-      "src": "screenshots/mobile.jpg",
-      "sizes": "1024x1024",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "AuraPEQ Mobile View"
     }
   ]
 }

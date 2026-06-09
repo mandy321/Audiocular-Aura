@@ -1,4 +1,4 @@
-const CACHE_NAME = "aurapeq-cache-v3";
+const CACHE_NAME = "aurapeq-cache-v4";
 const ASSETS_TO_CACHE = [
 	"./",
 	"./index.html",
@@ -7,8 +7,7 @@ const ASSETS_TO_CACHE = [
 	"./icon-512.png",
 	"./assets/index.js",
 	"./assets/index.css",
-	"./screenshots/desktop.jpg",
-	"./screenshots/mobile.jpg"
+	"./screenshots/desktop.jpg"
 ];
 
 // Install Event - Pre-cache basic static assets
