@@ -21,7 +21,9 @@ Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.g
 * **Automatic Connection & Hot-Plug Detection**: Auto-detects and connects to previously paired USB DACs on load. Listens to WebHID connection/disconnection events to automatically connect or disconnect in real-time when physical devices are plugged or unplugged.
 * **Vibrant Status Indicators**: Status badge changes to a glowing emerald green ONLINE state when connected and returns to a grey OFFLINE state when disconnected.
 * **AutoEq Filter Type Normalization**: Robust parsing normalizes all shelf filter variants (such as `LS`, `LSC`, `HS`, `HSC`) from imported AutoEq profiles to ensure they display clearly in the bands controller dropdowns.
-* **Reset All Bands to Flat**: A one-click button to reset all 10 EQ bands to neutral baseline values (`1000 Hz`, `0 dB`, and Q=`1.0`) with confirmation.
+* **Reset Defaults (Octave Baseline)**: A button that resets the 10 bands to standard octave frequencies (`31` Hz to `16000` Hz) with `0 dB` gain and `0.75` Q factor (yielding a flat pass-through response).
+* **Reset to Flat (Clean Slate Baseline)**: A button that aligns all 10 bands to exactly `1000 Hz` with `0 dB` gain and `1.0` Q factor, giving you a clean slate to manually configure custom EQ bands from scratch.
+* **Full Hardware Factory Reset**: A button in the advanced controls panel that sends a direct command (`[1, 23, 0]`) to wipe the DAC's DSP registers and restore it to its un-equalized out-of-the-box state.
 * **Verbose USB Packet Console**: Displays live formatted hex payloads for all outgoing (`[TX]`) and incoming (`[RX]`) WebHID reports, with smart Feature Report control transfer fallbacks.
 * **Ergonomic DAW-Style Layout**: A wider `1400px` layout with vertical sliders, side-by-side band strips, and wider input boxes that support up to 5-digit frequency fields (such as `16000` Hz) without visual truncation.
 * **Pinned Favorites List**: Click the star `★` icon next to search items in the AutoEq index to save headphone models to your pinned favorites panel for rapid switching.
