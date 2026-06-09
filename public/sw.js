@@ -1,4 +1,4 @@
-const CACHE_NAME = "aurapeq-cache-v2";
+const CACHE_NAME = "aurapeq-cache-v3";
 const ASSETS_TO_CACHE = [
 	"./",
 	"./index.html",
@@ -6,7 +6,9 @@ const ASSETS_TO_CACHE = [
 	"./icon-192.png",
 	"./icon-512.png",
 	"./assets/index.js",
-	"./assets/index.css"
+	"./assets/index.css",
+	"./screenshots/desktop.jpg",
+	"./screenshots/mobile.jpg"
 ];
 
 // Install Event - Pre-cache basic static assets
@@ -54,7 +56,7 @@ self.addEventListener("fetch", (event) => {
 				fetch(event.request).then((networkResponse) => {
 					if (networkResponse && networkResponse.status === 200) {
 						caches.open(CACHE_NAME).then((cache) => {
-							cache.put(event.request, networkResponse);
+							cache.put(event.request, networkResponse.clone());
 						});
 					}
 				}).catch(() => {/* Ignore network errors offline */});
