@@ -36,6 +36,9 @@ Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.g
   * **Sync to RAM**: Applies settings instantly to hear your changes.
   * **Save to Flash**: Write the settings permanently to the DAC's internal flash memory so they persist when you connect the DAC to other devices (like phones, tablets, or consoles).
 * **Universal USB Override Connection**: If your specific DAC revision or batch reports different USB identification codes, enter a custom hex Vendor ID (VID) and Product ID (PID) to bypass connections.
+* **Clean Neutral Import Padding**: When importing an AutoEq text profile with fewer than 10 filters, all unspecified bands are automatically filled to a neutral state (Gain `0 dB`, Freq `1000 Hz`, Q `0.71`, Type `Peak`) instead of inheriting stale values from the previous preset.
+* **Scroll Lock on Preset Load**: Selecting a preset or loading a profile no longer jumps the page. Scroll position is saved and restored around the DOM rebuild, keeping you exactly where you were on the page.
+* **Full Preset Name Display**: The "Last Applied EQ" label in the header now shows the complete preset name without truncation, so long names like `Sennheiser HD 600 (oratory1990)` are always fully visible.
 
 ---
 
