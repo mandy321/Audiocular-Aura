@@ -174,10 +174,13 @@ export function renderUI(eqState: EQ) {
 	const infoSlots = document.getElementById("infoSlots");
 	if (infoSlots) infoSlots.innerText = `${activeSlots} / ${eqState.length}`;
 
-	// 2. Render or Sync the 8 EQ Strips side-by-side
+	// 2. Render or Sync the EQ Strips side-by-side
 	const stripsContainer = document.getElementById("eqStrips");
 	if (stripsContainer) {
 		if (stripsContainer.children.length === 0) {
+			// Save scroll position before full DOM rebuild to prevent page jump
+			const savedScrollY = window.scrollY;
+
 			stripsContainer.innerHTML = "";
 			eqState.forEach((band, i) => {
 				const div = document.createElement("div");
@@ -226,6 +229,9 @@ export function renderUI(eqState: EQ) {
 				`;
 				stripsContainer.appendChild(div);
 			});
+
+			// Restore scroll position after DOM rebuild
+			window.scrollTo({ top: savedScrollY, behavior: "instant" });
 		} else {
 			// Update the values in the existing elements
 			eqState.forEach((_, i) => {
@@ -234,6 +240,7 @@ export function renderUI(eqState: EQ) {
 		}
 	}
 }
+
 
 /**
  * Connect to audio DAC via WebHID

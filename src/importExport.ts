@@ -9,11 +9,26 @@ import {
 } from "./fn.ts";
 import { syncToDevice } from "./dsp.ts";
 import { log, updateGlobalGain } from "./helpers.ts";
-import type { EQ } from "./main.ts";
+import type { Band, EQ } from "./main.ts";
 
 interface ProfileData {
 	globalGain: number;
 	bands: EQ;
+}
+
+/**
+ * Returns a neutral/flat band at a given index.
+ * Used to fill any unspecified slots when importing a profile.
+ */
+function neutralBand(index: number): Band {
+	return {
+		index,
+		freq: 1000,
+		gain: 0,
+		q: 0.71,
+		type: "PK",
+		enabled: true,
+	};
 }
 
 /**
@@ -61,7 +76,9 @@ function parseJsonProfile(content: string): ProfileData {
  */
 function parseTextProfile(content: string): ProfileData {
 	const lines = content.split(/\r?\n/);
-	const bands: EQ = JSON.parse(JSON.stringify(getEqState())); // Start with current state config length
+	const currentBandsCount = getEqState().length;
+	// Start from a clean neutral baseline — never inherit current active EQ values
+	const bands: EQ = Array.from({ length: currentBandsCount }, (_, i) => neutralBand(i)) as EQ;
 	let globalGain = 0;
 
 	// Regex for Preamp: "Preamp: -8.0 dB"
@@ -149,11 +166,12 @@ export async function importProfile(e: Event) {
 				log(`Note: Imported profile has ${importedBands.length} bands but current device only supports ${currentBandsCount} bands. Keeping the first ${currentBandsCount} bands.`);
 				importedBands = importedBands.slice(0, currentBandsCount);
 			} else if (importedBands.length < currentBandsCount) {
-				const currentEq = getEqState();
-				importedBands = [
-					...importedBands,
-					...JSON.parse(JSON.stringify(currentEq.slice(importedBands.length)))
-				];
+				// Fill remaining slots with neutral flat bands, not current EQ state
+				const extraNeutral = Array.from(
+					{ length: currentBandsCount - importedBands.length },
+					(_, i) => neutralBand(importedBands.length + i)
+				);
+				importedBands = [...importedBands, ...extraNeutral];
 			}
 			
 			// Normalize indices to match new length
@@ -211,11 +229,12 @@ export async function loadProfileFromText(content: string, presetName?: string) 
 		if (importedBands.length > currentBandsCount) {
 			importedBands = importedBands.slice(0, currentBandsCount);
 		} else if (importedBands.length < currentBandsCount) {
-			const currentEq = getEqState();
-			importedBands = [
-				...importedBands,
-				...JSON.parse(JSON.stringify(currentEq.slice(importedBands.length)))
-			];
+			// Fill remaining slots with neutral flat bands, not current EQ state
+			const extraNeutral = Array.from(
+				{ length: currentBandsCount - importedBands.length },
+				(_, i) => neutralBand(importedBands.length + i)
+			);
+			importedBands = [...importedBands, ...extraNeutral];
 		}
 		
 		// Normalize indices to match new length
