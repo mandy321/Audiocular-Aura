@@ -351,7 +351,10 @@
       <section class="control-card log-card">
         <div class="log-header">
           <h3 class="log-title">System Messages Console</h3>
-          <button class="btn btn-clear-log" onclick="document.getElementById('logConsole').innerHTML = '<div>Console cleared.</div>'" aria-label="Clear Log Console">Clear</button>
+          <div class="log-header-buttons" style="display: flex; gap: 8px;">
+            <button id="btnCopyLog" class="btn btn-clear-log" aria-label="Copy Log Console to Clipboard">Copy</button>
+            <button class="btn btn-clear-log" onclick="document.getElementById('logConsole').innerHTML = '<div>Console cleared.</div>'" aria-label="Clear Log Console">Clear</button>
+          </div>
         </div>
         <div id="logConsole" class="log-body">Ready to connect...</div>
       </section>

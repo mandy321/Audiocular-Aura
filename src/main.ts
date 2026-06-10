@@ -650,4 +650,33 @@ window.addEventListener("appinstalled", () => {
 	deferredPrompt = null;
 });
 
+/**
+ * SYSTEM MESSAGES CONSOLE COPY TO CLIPBOARD
+ */
+const btnCopyLog = document.getElementById("btnCopyLog");
+btnCopyLog?.addEventListener("click", async () => {
+	const logConsole = document.getElementById("logConsole");
+	if (logConsole) {
+		const lines = Array.from(logConsole.querySelectorAll("div")).map((div) => div.innerText);
+		const textToCopy = lines.length > 0 ? lines.join("\n") : logConsole.innerText;
+		try {
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				await navigator.clipboard.writeText(textToCopy);
+			} else {
+				const textarea = document.createElement("textarea");
+				textarea.value = textToCopy;
+				textarea.style.position = "fixed";
+				textarea.style.opacity = "0";
+				document.body.appendChild(textarea);
+				textarea.select();
+				document.execCommand("copy");
+				document.body.removeChild(textarea);
+			}
+			log("[System] Console logs copied to clipboard!");
+		} catch (err) {
+			log(`[System] Failed to copy logs: ${(err as Error).message}`);
+		}
+	}
+});
+
 
