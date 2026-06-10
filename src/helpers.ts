@@ -71,7 +71,7 @@ export async function setGlobalGain(e: Event) {
  */
 export function enableControls(enabled: boolean) {
 	const els = document.querySelectorAll(
-		"input, select, button.action, button.reset, button#btnExport",
+		"input, select, button.action, button.reset, button#btnExport, button#btnExportTxt",
 	);
 	for (const el of els) {
 		(el as HTMLInputElement | HTMLSelectElement | HTMLButtonElement).disabled = !enabled;

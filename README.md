@@ -30,7 +30,8 @@ Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.g
 * **Local Custom Profiles Manager**: Save your current active EQ profiles directly to browser local storage with custom names. Easily reload, overwrite, or delete saved custom profiles with built-in band compatibility handling between 5-band and 10-band configurations.
 * **Supported Devices Database**: A searchable modal listing all compatible controllers (Savitech, Comtrue, FiiO) with their chipset details.
 * **Profile Import/Export**:
-  * Save and load settings using standard `.json` configuration files.
+  * Save and load settings using standard `.json` configuration files (**EXPORT JSON** button).
+  * Export as a standard **AutoEq parametric text file** (`.txt`) compatible with EqualizerAPO, Poweramp, Squiglink, and any AutoEq-aware tool (**EXPORT TEXT** button).
   * Import standard **AutoEq text profiles** (compatible with presets exported from [AutoEq.app](https://autoeq.app) or [Squiglink](https://squig.link)).
 * **Memory Persistence**:
   * **Sync to RAM**: Applies settings instantly to hear your changes.

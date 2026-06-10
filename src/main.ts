@@ -20,7 +20,7 @@ import {
 	saveCustomProfile,
 } from "./fn.ts";
 import { setGlobalGain, log } from "./helpers.ts";
-import { exportProfile, importProfile } from "./importExport.ts";
+import { exportProfile, exportProfileAsText, importProfile } from "./importExport.ts";
 import {
 	getAutoEqPresets,
 	searchPresets,
@@ -130,6 +130,9 @@ globalSlider?.addEventListener("input", async (e) => setGlobalGain(e));
  */
 const btnExport = document.getElementById("btnExport");
 btnExport?.addEventListener("click", () => exportProfile());
+
+const btnExportTxt = document.getElementById("btnExportTxt");
+btnExportTxt?.addEventListener("click", () => exportProfileAsText());
 
 const btnImport = document.getElementById("btnImport");
 const fileInput = document.getElementById("fileInput");

@@ -58,6 +58,43 @@ export async function exportProfile() {
 }
 
 /**
+ * Export profile to AutoEq-compatible parametric text file
+ * Format: Preamp: X dB / Filter N: ON/OFF PK|LSQ|HSQ Fc XXXX Hz Gain X.X dB Q X.XX
+ */
+export async function exportProfileAsText() {
+	const device = getDevice();
+	const globalGainState = getGlobalGainState();
+	const eqState = getEqState();
+	if (!device) return;
+
+	// Map internal type names to AutoEq standard names
+	const typeMap: Record<string, string> = {
+		PK: "PK",
+		LSQ: "LSQ",
+		HSQ: "HSQ",
+	};
+
+	const lines: string[] = [];
+	lines.push(`Preamp: ${globalGainState.toFixed(1)} dB`);
+
+	eqState.forEach((band, i) => {
+		const enabled = band.enabled ? "ON" : "OFF";
+		const type = typeMap[band.type] || "PK";
+		const freq = Math.round(band.freq);
+		const gain = band.gain.toFixed(1);
+		const q = band.q.toFixed(2);
+		lines.push(`Filter ${i + 1}: ${enabled} ${type} Fc ${freq} Hz Gain ${gain} dB Q ${q}`);
+	});
+
+	const text = lines.join("\n");
+	const blob = new Blob([text], { type: "text/plain" });
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(blob);
+	a.download = "aura_peq_profile.txt";
+	a.click();
+}
+
+/**
  * Parse JSON profile data
  */
 function parseJsonProfile(content: string): ProfileData {
