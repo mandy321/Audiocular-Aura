@@ -27,6 +27,7 @@ Live Web App: **[https://mandy321.github.io/Audiocular-Aura/](https://mandy321.g
 * **Verbose USB Packet Console**: Displays live formatted hex payloads for all outgoing (`[TX]`) and incoming (`[RX]`) WebHID reports, with smart Feature Report control transfer fallbacks.
 * **Ergonomic DAW-Style Layout**: A wider `1400px` layout with vertical sliders, side-by-side band strips, and wider input boxes that support up to 5-digit frequency fields (such as `16000` Hz) without visual truncation.
 * **Pinned Favorites List**: Click the star `★` icon next to search items in the AutoEq index to save headphone models to your pinned favorites panel for rapid switching.
+* **Local Custom Profiles Manager**: Save your current active EQ profiles directly to browser local storage with custom names. Easily reload, overwrite, or delete saved custom profiles with built-in band compatibility handling between 5-band and 10-band configurations.
 * **Supported Devices Database**: A searchable modal listing all compatible controllers (Savitech, Comtrue, FiiO) with their chipset details.
 * **Profile Import/Export**:
   * Save and load settings using standard `.json` configuration files.
