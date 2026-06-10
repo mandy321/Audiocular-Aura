@@ -9,7 +9,7 @@ import {
 	VID_AUDIOCULAR,
 	KNOWN_DACS,
 } from "./constants.ts";
-import { readDeviceParams, setupListener, syncToDevice, queueRealtimeBandWrite } from "./dsp.ts";
+import { readDeviceParams, setupListener, syncToDevice, queueRealtimeBandWrite, getProtocol } from "./dsp.ts";
 import { enableControls, log, updateGlobalGainUI, refreshStripUI } from "./helpers.ts";
 import type { Band, EQ } from "./main.ts";
 import { renderPEQ, resizeCanvas } from "./peq.ts";
@@ -76,10 +76,10 @@ export function identifyConnectedDac(dev: HIDDevice) {
 	}
 
 	// Update device info details
-	const name = (dev.productName || "").toUpperCase();
 	const isMoondrop = dev.vendorId === VID_COMTRUE;
-	const isSavitech = dev.vendorId === VID_SAVITECH || dev.vendorId === VID_SAVITECH_ALT || dev.vendorId === VID_SAVITECH_OFFICIAL || dev.vendorId === VID_AUDIOCULAR || name.includes("JA11");
-	const sampleRateStr = (isSavitech || isMoondrop) ? "96 kHz" : "48 kHz";
+	const isJa11 = dev.vendorId === VID_FIIO && dev.productId === 258;
+	const isSavitech = dev.vendorId === VID_SAVITECH || dev.vendorId === VID_SAVITECH_ALT || dev.vendorId === VID_SAVITECH_OFFICIAL || dev.vendorId === VID_AUDIOCULAR;
+	const sampleRateStr = (isSavitech || isMoondrop || isJa11) ? "96 kHz" : "48 kHz";
 	
 	const infoSampleRate = document.getElementById("infoSampleRate");
 	if (infoSampleRate) infoSampleRate.innerText = sampleRateStr;
@@ -170,7 +170,7 @@ export function renderUI(eqState: EQ) {
 	// Update PEQ slots count
 	const activeSlots = eqState.filter(b => b.enabled && b.gain !== 0).length;
 	const infoSlots = document.getElementById("infoSlots");
-	if (infoSlots) infoSlots.innerText = `${activeSlots} / 10`;
+	if (infoSlots) infoSlots.innerText = `${activeSlots} / ${eqState.length}`;
 
 	// 2. Render or Sync the 8 EQ Strips side-by-side
 	const stripsContainer = document.getElementById("eqStrips");
@@ -290,6 +290,9 @@ export async function connectToDevice() {
 			`Successfully connected to: ${device.productName || "Unknown DAC"} (VID: 0x${device.vendorId.toString(16).toUpperCase()}, PID: 0x${device.productId.toString(16).toUpperCase()})`,
 		);
 
+		// Adjust bands for device
+		adjustBandsForDevice(device);
+
 		// Identify DAC automatically
 		identifyConnectedDac(device);
 
@@ -313,7 +316,9 @@ export async function connectToDevice() {
 
 		// Support parameter reading for Savitech-based DACs (including FiiO JA11)
 		const nameUpper = (device.productName || "").toUpperCase();
+		const protocol = getProtocol(device);
 		if (
+			protocol === "FIIO_JA11" ||
 			device.vendorId === VID_SAVITECH ||
 			device.vendorId === VID_SAVITECH_ALT ||
 			device.vendorId === VID_SAVITECH_OFFICIAL ||
@@ -323,7 +328,7 @@ export async function connectToDevice() {
 		) {
 			await readDeviceParams(device);
 		} else {
-			log("Note: Parameter reading is only supported for Savitech-based devices. Starting with a flat profile.");
+			log("Note: Parameter reading is only supported for Savitech and FiiO JA11 devices. Starting with a flat profile.");
 		}
 	} catch (err) {
 		log(`Connection Error: ${(err as Error).message}`);
@@ -340,6 +345,8 @@ export async function disconnectDevice() {
 		await device.close();
 		device = null;
 		
+		adjustBandsForDevice(null);
+
 		const badgeContainer = document.getElementById("dacBadgeContainer");
 		if (badgeContainer) badgeContainer.classList.add("hidden");
 
@@ -360,6 +367,7 @@ export async function disconnectDevice() {
 		if (versionEl) versionEl.innerText = "";
 
 		enableControls(false);
+		renderUI(eqState);
 		log("Disconnected.");
 	} catch (err) {
 		log(`Disconnection Error: ${(err as Error).message}`);
@@ -379,7 +387,23 @@ export async function resetToDefaults() {
 
 	log("Resetting to factory defaults...");
 
-	eqState = defaultEqState();
+	if (device && getProtocol(device) === "FIIO_JA11") {
+		eqState = [
+			{ index: 0, freq: 100, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 1, freq: 500, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 2, freq: 1000, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 3, freq: 2500, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 4, freq: 10000, gain: 0, q: 0.7, type: "PK", enabled: true },
+		] as EQ;
+	} else {
+		eqState = defaultEqState();
+	}
+	
+	const stripsContainer = document.getElementById("eqStrips");
+	if (stripsContainer) {
+		stripsContainer.innerHTML = "";
+	}
+
 	setGlobalGain(0);
 	renderUI(eqState);
 
@@ -453,6 +477,7 @@ export async function autoConnectDevice() {
 		await device.open();
 
 		log(`[System] Auto-connected to previously authorized device: ${device.productName || "Unknown DAC"}`);
+		adjustBandsForDevice(device);
 		identifyConnectedDac(device);
 
 		const statusBadge = document.getElementById("statusBadge");
@@ -473,7 +498,9 @@ export async function autoConnectDevice() {
 
 		const nameUpper = (device.productName || "").toUpperCase();
 		const customVidEl = document.getElementById("customVid") as HTMLInputElement;
+		const protocol = getProtocol(device);
 		if (
+			protocol === "FIIO_JA11" ||
 			device.vendorId === VID_SAVITECH ||
 			device.vendorId === VID_SAVITECH_ALT ||
 			device.vendorId === VID_SAVITECH_OFFICIAL ||
@@ -485,6 +512,48 @@ export async function autoConnectDevice() {
 		}
 	} catch (err) {
 		log(`[System] Auto-connect failed: ${(err as Error).message}`);
+	}
+}
+
+/**
+ * Adjust active EQ bands configuration based on connected device type
+ */
+export function adjustBandsForDevice(dev: HIDDevice | null) {
+	const stripsContainer = document.getElementById("eqStrips");
+	if (!dev) {
+		eqState = defaultEqState();
+		if (stripsContainer) {
+			stripsContainer.innerHTML = "";
+			stripsContainer.style.removeProperty("--bands-count");
+			stripsContainer.style.removeProperty("--bands-count-tablet");
+			stripsContainer.style.removeProperty("--bands-count-mobile");
+		}
+		return;
+	}
+
+	const protocol = getProtocol(dev);
+	if (protocol === "FIIO_JA11") {
+		eqState = [
+			{ index: 0, freq: 100, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 1, freq: 500, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 2, freq: 1000, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 3, freq: 2500, gain: 0, q: 0.7, type: "PK", enabled: true },
+			{ index: 4, freq: 10000, gain: 0, q: 0.7, type: "PK", enabled: true },
+		] as EQ;
+		if (stripsContainer) {
+			stripsContainer.innerHTML = "";
+			stripsContainer.style.setProperty("--bands-count", "5");
+			stripsContainer.style.setProperty("--bands-count-tablet", "5");
+			stripsContainer.style.setProperty("--bands-count-mobile", "2");
+		}
+	} else {
+		eqState = defaultEqState();
+		if (stripsContainer) {
+			stripsContainer.innerHTML = "";
+			stripsContainer.style.removeProperty("--bands-count");
+			stripsContainer.style.removeProperty("--bands-count-tablet");
+			stripsContainer.style.removeProperty("--bands-count-mobile");
+		}
 	}
 }
 

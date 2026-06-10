@@ -19,17 +19,77 @@ import {
 import { delay, log, refreshStripUI, logTx, logRx } from "./helpers.ts";
 import type { Band } from "./main.ts";
 
+const REV_TYPE_MAP_JA11: Record<number, string> = { 0: "PK", 1: "LSQ", 2: "HSQ" };
+
 /**
  * DETECT PROTOCOL BASED ON VENDOR ID
  */
-function getProtocol(device: HIDDevice) {
+export function getProtocol(device: HIDDevice) {
 	if (device.vendorId === VID_COMTRUE) return "MOONDROP";
 	if (device.vendorId === VID_FIIO) {
 		const prodName = (device.productName || "").toUpperCase();
-		if (prodName.includes("JA11")) return "SAVITECH";
+		if (device.productId === 258 || prodName.includes("JA11")) return "FIIO_JA11";
 		return "FIIO";
 	}
 	return "SAVITECH"; // Default (used by CB5100/Audiocular Aura)
+}
+
+/**
+ * Write band for FiiO JA11 (KT02H20) devices
+ */
+async function writeBandJa11(device: HIDDevice, band: Band, gain: number) {
+	const typeMap = { PK: 0, LSQ: 1, HSQ: 2 };
+	const i = band.index;
+	let g = Math.round(gain * 10);
+	if (g < 0) g = 65536 + g;
+	const f = Math.round(band.freq);
+	const qv = Math.round(band.q * 100);
+
+	const packet = new Uint8Array([
+		0xaa,
+		0x0a,
+		0,
+		0,
+		21,
+		8,
+		i,
+		(g >> 8) & 0xff,
+		g & 0xff,
+		(f >> 8) & 0xff,
+		f & 0xff,
+		(qv >> 8) & 0xff,
+		qv & 0xff,
+		typeMap[band.type as keyof typeof typeMap] || 0,
+		0,
+		0xee,
+	]);
+
+	logTx(2, packet);
+	await device.sendReport(2, packet);
+}
+
+/**
+ * Set FiiO JA11 global master gain
+ */
+async function setMasterGainJa11(device: HIDDevice, gain: number) {
+	let value = Math.round(Math.max(-12, Math.min(12, gain)) * 2560);
+	if (value < 0) value = 65536 + value;
+
+	const packet = new Uint8Array([
+		0xaa,
+		0x0a,
+		0,
+		0,
+		23,
+		2,
+		value & 0xff,
+		(value >> 8) & 0xff,
+		0,
+		0xee,
+	]);
+
+	logTx(2, packet);
+	await device.sendReport(2, packet);
 }
 
 /**
@@ -45,6 +105,8 @@ export async function setDeviceGlobalGain(gain: number, skipBandSync = false) {
 
 	if (protocol === "FIIO") {
 		await setGlobalGainFiio(device, gain);
+	} else if (protocol === "FIIO_JA11") {
+		await setMasterGainJa11(device, gain);
 	} else if (protocol === "MOONDROP") {
 		await setGlobalGainMoondrop(device, gain);
 	} else {
@@ -81,6 +143,26 @@ export async function setDeviceGlobalGain(gain: number, skipBandSync = false) {
  */
 export async function readDeviceParams(device: HIDDevice) {
 	if (!device) return;
+	const protocol = getProtocol(device);
+	if (protocol === "FIIO_JA11") {
+		log("Reading FiiO JA11 configuration...");
+		// Request global gain
+		const gainPacket = new Uint8Array([0xbb, 0x0b, 0, 0, 23, 0, 0, 0xee]);
+		logTx(2, gainPacket);
+		await device.sendReport(2, gainPacket);
+		await delay(200);
+
+		// Request 5 bands
+		for (let i = 0; i < 5; i++) {
+			const bandPacket = new Uint8Array([0xbb, 0x0b, 0, 0, 21, 1, i, 0xee]);
+			logTx(2, bandPacket);
+			await device.sendReport(2, bandPacket);
+			await delay(150);
+		}
+		log("Configuration loaded.");
+		return;
+	}
+
 	log("Reading device configuration...");
 
 	// Read Version (Query and Ack Query sequence)
@@ -172,6 +254,39 @@ export function setupListener(device: HIDDevice) {
 		const versionEl = document.getElementById("fwVersion");
 		const data = new Uint8Array(event.data.buffer);
 		logRx(event.reportId, data);
+
+		const protocol = getProtocol(device);
+		if (protocol === "FIIO_JA11") {
+			const cmd = data[4];
+			if (cmd === 23) {
+				const raw = (data[7] << 8) | data[6];
+				const signed = raw > 32767 ? raw - 65536 : raw;
+				const gain = Number.parseFloat((signed / 2560).toFixed(1));
+				setGlobalGain(gain);
+			} else if (cmd === 21) {
+				const idx = data[6];
+				if (idx < eqState.length) {
+					const rawGain = (data[7] << 8) | data[8];
+					const signedGain = rawGain > 32767 ? rawGain - 65536 : rawGain;
+					const gain = Number.parseFloat((signedGain / 10).toFixed(1));
+					const freq = (data[9] << 8) | data[10];
+					const qRaw = (data[11] << 8) | data[12];
+					const q = Number.parseFloat((qRaw / 100).toFixed(2));
+					const type = REV_TYPE_MAP_JA11[data[13]] || "PK";
+
+					eqState[idx].freq = freq;
+					eqState[idx].q = q;
+					eqState[idx].gain = gain;
+					eqState[idx].type = type;
+					eqState[idx].enabled = true;
+
+					refreshStripUI(eqState, idx);
+				}
+			}
+			renderUI(eqState);
+			return;
+		}
+
 		const cmd = data[1];
 
 		if (cmd === CMD_SAVI.VERSION) {
@@ -310,10 +425,14 @@ export async function syncToDevice() {
 		await delay(30);
 	}
 
-	// 3. Commit / Temp Save (required by Savitech)
+	// 3. Commit / Temp Save
 	if (protocol === "SAVITECH") {
 		await sendPacketSavitech(device, [1, 10, 4, 0, 0, 255, 255]);
 		await refreshToFlash(device);
+	} else if (protocol === "FIIO_JA11") {
+		const packet = new Uint8Array([0xaa, 0x0a, 0, 0, 24, 1, 1, 0, 0xee]);
+		logTx(2, packet);
+		await device.sendReport(2, packet);
 	}
 
 	log("Sync Complete.");
@@ -343,6 +462,10 @@ export async function flashToFlash() {
 			CMD_FIIO.END,
 		]);
 		await device.sendReport(REPORT_ID_FIIO, packet);
+	} else if (protocol === "FIIO_JA11") {
+		const packet = new Uint8Array([0xaa, 0x0a, 0, 0, 25, 1, 3, 0, 0xee]);
+		logTx(2, packet);
+		await device.sendReport(2, packet);
 	} else if (protocol === "MOONDROP") {
 		const packet = new Uint8Array([CMD_MOON.WRITE, CMD_MOON.SAVE_FLASH]);
 		await device.sendReport(REPORT_ID_DEFAULT, packet);
@@ -372,6 +495,8 @@ export async function writeBand(
 
 	if (protocol === "FIIO") {
 		await writeBandFiio(device, band, effectiveGain);
+	} else if (protocol === "FIIO_JA11") {
+		await writeBandJa11(device, band, effectiveGain);
 	} else if (protocol === "MOONDROP") {
 		await writeBandMoondrop(device, band, effectiveGain);
 	} else {
@@ -820,7 +945,7 @@ export function queueRealtimeBandWrite(device: HIDDevice, band: Band) {
 			await delay(25);
 		}
 
-		// If Savitech, send commit packet
+		// Commit / Apply changes for Savitech or FiiO JA11
 		if (protocol === "SAVITECH") {
 			try {
 				await sendPacketSavitech(device, [1, 10, 4, 0, 0, 255, 255]);
@@ -828,6 +953,14 @@ export function queueRealtimeBandWrite(device: HIDDevice, band: Band) {
 				await refreshToFlash(device);
 			} catch (e) {
 				log(`Savitech Realtime Commit Error: ${(e as Error).message}`);
+			}
+		} else if (protocol === "FIIO_JA11") {
+			try {
+				const packet = new Uint8Array([0xaa, 0x0a, 0, 0, 24, 1, 1, 0, 0xee]);
+				logTx(2, packet);
+				await device.sendReport(2, packet);
+			} catch (e) {
+				log(`FiiO JA11 Realtime Commit Error: ${(e as Error).message}`);
 			}
 		}
 	}, 50); // 50ms batching window

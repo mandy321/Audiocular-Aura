@@ -1083,20 +1083,20 @@ body.aura-app-theme {
 
 .eq-strips-grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(var(--bands-count, 10), 1fr);
   gap: 12px;
   width: 100%;
 }
 
 @media (max-width: 1200px) {
   .eq-strips-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(var(--bands-count-tablet, 5), 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .eq-strips-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(var(--bands-count-mobile, 2), 1fr);
   }
 }
 

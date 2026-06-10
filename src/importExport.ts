@@ -1,5 +1,4 @@
 import {
-	defaultEqState,
 	getDevice,
 	getEqState,
 	getGlobalGainState,
@@ -62,7 +61,7 @@ function parseJsonProfile(content: string): ProfileData {
  */
 function parseTextProfile(content: string): ProfileData {
 	const lines = content.split(/\r?\n/);
-	const bands: EQ = defaultEqState(); // Start with defaults
+	const bands: EQ = JSON.parse(JSON.stringify(getEqState())); // Start with current state config length
 	let globalGain = 0;
 
 	// Regex for Preamp: "Preamp: -8.0 dB"
@@ -143,13 +142,37 @@ export async function importProfile(e: Event) {
 				throw new Error("Unknown file format. Must be JSON or AutoEq txt file.");
 			}
 
-			// Update internal state
-			setEqState(profile.bands);
+			// Update internal state and handle variable band count
+			let importedBands = profile.bands;
+			const currentBandsCount = getEqState().length;
+			if (importedBands.length > currentBandsCount) {
+				log(`Note: Imported profile has ${importedBands.length} bands but current device only supports ${currentBandsCount} bands. Keeping the first ${currentBandsCount} bands.`);
+				importedBands = importedBands.slice(0, currentBandsCount);
+			} else if (importedBands.length < currentBandsCount) {
+				const currentEq = getEqState();
+				importedBands = [
+					...importedBands,
+					...JSON.parse(JSON.stringify(currentEq.slice(importedBands.length)))
+				];
+			}
+			
+			// Normalize indices to match new length
+			importedBands.forEach((band, idx) => {
+				band.index = idx;
+			});
+
+			// Re-create DOM elements for strips to ensure correct bands count
+			const stripsContainer = document.getElementById("eqStrips");
+			if (stripsContainer) {
+				stripsContainer.innerHTML = "";
+			}
+
+			setEqState(importedBands);
 			setGlobalGainState(profile.globalGain);
 
 			// Update UI and send preamp packet
 			updateGlobalGain(profile.globalGain);
-			renderUI(profile.bands);
+			renderUI(importedBands);
 
 			const name = `Imported: ${file.name.replace(/\.[^/.]+$/, "")}`;
 			setLastAppliedEqName(name);
@@ -182,13 +205,37 @@ export async function loadProfileFromText(content: string, presetName?: string) 
 	try {
 		const profile = parseTextProfile(content);
 
+		// Update internal state and handle variable band count
+		let importedBands = profile.bands;
+		const currentBandsCount = getEqState().length;
+		if (importedBands.length > currentBandsCount) {
+			importedBands = importedBands.slice(0, currentBandsCount);
+		} else if (importedBands.length < currentBandsCount) {
+			const currentEq = getEqState();
+			importedBands = [
+				...importedBands,
+				...JSON.parse(JSON.stringify(currentEq.slice(importedBands.length)))
+			];
+		}
+		
+		// Normalize indices to match new length
+		importedBands.forEach((band, idx) => {
+			band.index = idx;
+		});
+
+		// Re-create DOM elements for strips to ensure correct bands count
+		const stripsContainer = document.getElementById("eqStrips");
+		if (stripsContainer) {
+			stripsContainer.innerHTML = "";
+		}
+
 		// Update internal state
-		setEqState(profile.bands);
+		setEqState(importedBands);
 		setGlobalGainState(profile.globalGain);
 
 		// Update UI and send preamp packet
 		updateGlobalGain(profile.globalGain);
-		renderUI(profile.bands);
+		renderUI(importedBands);
 
 		const name = presetName || "Loaded Profile";
 		setLastAppliedEqName(name);

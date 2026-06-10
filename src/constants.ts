@@ -73,7 +73,7 @@ export interface IdentifiedDac {
 	pid?: number;
 	name: string;
 	chipset: string;
-	protocol: "SAVITECH" | "MOONDROP" | "FIIO";
+	protocol: "SAVITECH" | "MOONDROP" | "FIIO" | "FIIO_JA11";
 	description: string;
 }
 
@@ -115,7 +115,15 @@ export const KNOWN_DACS: IdentifiedDac[] = [
 	},
 	{
 		vid: VID_FIIO,
-		name: "FiiO JA11 / KA17 / KA15 / KB1",
+		pid: 258, // 0x0102
+		name: "FiiO JadeAudio JA11",
+		chipset: "KT02H20 DSP Core",
+		protocol: "FIIO_JA11",
+		description: "Supports FiiO's custom 5-band KT02H20 DSP PEQ protocol over raw HID commands.",
+	},
+	{
+		vid: VID_FIIO,
+		name: "FiiO KA17 / KA15 / KB1",
 		chipset: "FiiO DSP Core",
 		protocol: "FIIO",
 		description: "Supports FiiO's custom 10-band DSP PEQ protocol over proprietary raw HID commands.",

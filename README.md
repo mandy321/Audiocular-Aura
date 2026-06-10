@@ -53,9 +53,10 @@ AuraPEQ features a multi-protocol hardware communication layer that supports sev
 
 | Chipset / Protocol | Key Brands & Models | Connection Details |
 | :--- | :--- | :--- |
-| **Savitech (Walkplay)** | Audiocular Aura, JCally (Generic), Fosi, iBasso | Uses standard Q30 fixed-point IIR filter calculations. |
-| **Moondrop / Comtrue** | Moondrop, Tanchjim (CT7601 chips) | Uses specialized double-precision biquad coefficient encoding. |
-| **FiiO** | FiiO (JA11, KA17, etc.) | Decodes gain, frequency, and Q parameters to FiiO's filter parameters report formats. |
+| **Savitech (Walkplay)** | Audiocular Aura, JCally (Generic), Fosi, iBasso | Uses standard Q30 fixed-point IIR filter calculations (10 bands). |
+| **Moondrop / Comtrue** | Moondrop, Tanchjim (CT7601 chips) | Uses specialized double-precision biquad coefficient encoding (10 bands). |
+| **FiiO** | FiiO (KA17, KA15, KB1, etc.) | Decodes gain, frequency, and Q parameters to FiiO's custom 10-band DSP PEQ formats (Report ID 7). |
+| **FiiO JA11 (KT02H20)** | FiiO JadeAudio JA11 | Uses the KT02H20 5-band DSP PEQ protocol over proprietary raw HID commands (Report ID 2). |
 
 ### How to use with other DACs:
 1. If your DAC uses one of the supported chipsets listed above, connect it to your computer.
