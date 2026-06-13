@@ -13,6 +13,8 @@ import {
 import {
 	getDevice,
 	getEqState,
+	setEqState,
+	defaultEqState,
 	getGlobalGainState,
 	renderUI,
 	setGlobalGain,
@@ -168,7 +170,119 @@ export async function setDeviceGlobalGain(gain: number, skipBandSync = false) {
 }
 
 /**
- * Read parameters from Savitech device
+ * Wait for a specific input report matching a command and sub-command
+ */
+function waitForReport(
+	device: HIDDevice,
+	expectedCmd: number,
+	expectedSubcmd: number,
+	expectedBandIndex?: number,
+	timeoutMs = 200,
+): Promise<Uint8Array> {
+	return new Promise((resolve, reject) => {
+		const timer = setTimeout(() => {
+			device.removeEventListener("inputreport", listener);
+			reject(new Error(`Timeout waiting for cmd=${expectedCmd}, subcmd=${expectedSubcmd}`));
+		}, timeoutMs);
+
+		function listener(event: any) {
+			const data = new Uint8Array(event.data.buffer);
+			const cmd = data[0];
+			const subcmd = data[1];
+
+			if (cmd === expectedCmd && subcmd === expectedSubcmd) {
+				if (expectedBandIndex === undefined || data[4] === expectedBandIndex) {
+					clearTimeout(timer);
+					device.removeEventListener("inputreport", listener);
+					resolve(data);
+				}
+			}
+		}
+
+		device.addEventListener("inputreport", listener);
+	});
+}
+
+/**
+ * Read preamp gain and 10 bands sequentially from a Moondrop/Comtrue device
+ */
+async function readMoondropParams(device: HIDDevice): Promise<{ preamp: number; bands: any[] }> {
+	log("Reading Moondrop device configuration...");
+
+	// 1. Read preamp gain
+	const gainPacket = new Uint8Array(64);
+	gainPacket[0] = CMD_MOON.READ;
+	gainPacket[1] = CMD_MOON.PRE_GAIN;
+
+	let preamp = 0;
+	try {
+		const promise = waitForReport(device, CMD_MOON.READ, CMD_MOON.PRE_GAIN, undefined, 200);
+		await device.sendReport(0, gainPacket);
+		const response = await promise;
+
+		const raw = response[3] | (response[4] << 8);
+		const signed = raw > 32767 ? raw - 65536 : raw;
+		preamp = Number.parseFloat((signed / 256).toFixed(1));
+		log(`[Moondrop] Read Preamp: ${preamp} dB`);
+	} catch (e) {
+		log(`[Moondrop] Preamp read failed: ${(e as Error).message}`);
+		throw e;
+	}
+
+	// 2. Read all 10 bands sequentially
+	const bands: any[] = [];
+	const typeMapRev: Record<number, string> = { 1: "LSQ", 2: "PK", 3: "HSQ" };
+
+	for (let i = 0; i < 10; i++) {
+		const bandPacket = new Uint8Array(64);
+		bandPacket[0] = CMD_MOON.READ;
+		bandPacket[1] = CMD_MOON.UPDATE_EQ;
+		bandPacket[2] = 0x18;
+		bandPacket[3] = 0;
+		bandPacket[4] = i;
+
+		try {
+			const promise = waitForReport(device, CMD_MOON.READ, CMD_MOON.UPDATE_EQ, i, 200);
+			await device.sendReport(0, bandPacket);
+			const response = await promise;
+
+			let freq = response[27] | (response[28] << 8);
+			const qRaw = response[29] | (response[30] << 8);
+			const gainRaw = response[31] | (response[32] << 8);
+
+			let q = Number.parseFloat((qRaw / 256).toFixed(2));
+			const signedGain = gainRaw > 32767 ? gainRaw - 65536 : gainRaw;
+			let gain = Number.parseFloat((signedGain / 256).toFixed(1));
+			let type = typeMapRev[response[33]] || "PK";
+
+			// Interpret zero/invalid values as flat default band
+			if (freq === 0 || isNaN(freq) || q <= 0 || isNaN(q)) {
+				const defaultFreqs = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+				freq = defaultFreqs[i];
+				gain = 0;
+				q = 0.75;
+				type = "PK";
+			}
+
+			bands.push({
+				index: i,
+				freq,
+				gain,
+				q,
+				type,
+				enabled: true,
+			});
+		} catch (e) {
+			log(`[Moondrop] Band ${i + 1} read failed: ${(e as Error).message}`);
+			throw e;
+		}
+	}
+
+	return { preamp, bands };
+}
+
+/**
+ * Read parameters from device configuration
  * @param device The WebHID device
  */
 export async function readDeviceParams(device: HIDDevice) {
@@ -190,6 +304,21 @@ export async function readDeviceParams(device: HIDDevice) {
 			await delay(150);
 		}
 		log("Configuration loaded.");
+		return;
+	} else if (protocol === "MOONDROP") {
+		try {
+			const { preamp, bands } = await readMoondropParams(device);
+			setGlobalGain(preamp);
+			setEqState(bands);
+			renderUI(bands);
+			log("Moondrop configuration loaded successfully.");
+		} catch (err) {
+			log(`[System] Warning: Could not read current EQ from device: ${(err as Error).message}. Showing flat profile.`);
+			const flatEq = defaultEqState();
+			setEqState(flatEq);
+			setGlobalGain(0);
+			renderUI(flatEq);
+		}
 		return;
 	}
 
@@ -314,6 +443,10 @@ export function setupListener(device: HIDDevice) {
 				}
 			}
 			renderUI(eqState);
+			return;
+		}
+
+		if (protocol === "MOONDROP") {
 			return;
 		}
 

@@ -380,12 +380,12 @@ export async function connectToDevice() {
 
 		setupListener(device);
 
-		// Support parameter reading for Savitech-based DACs (including FiiO JA11)
+		// Support parameter reading for Savitech-based DACs (including FiiO JA11 and Moondrop)
 		const protocol = getProtocol(device);
-		if (protocol === "SAVITECH" || protocol === "FIIO_JA11") {
+		if (protocol === "SAVITECH" || protocol === "FIIO_JA11" || protocol === "MOONDROP") {
 			await readDeviceParams(device);
 		} else {
-			log("Note: Parameter reading is only supported for Savitech and FiiO JA11 devices. Starting with a flat profile.");
+			log("Note: Parameter reading is only supported for Savitech, FiiO JA11, and Moondrop devices. Starting with a flat profile.");
 			renderUI(eqState);
 		}
 	} catch (err) {
@@ -564,7 +564,7 @@ export async function autoConnectDevice() {
 		setupListener(dev);
 
 		const protocol = getProtocol(dev);
-		if (protocol === "SAVITECH" || protocol === "FIIO_JA11") {
+		if (protocol === "SAVITECH" || protocol === "FIIO_JA11" || protocol === "MOONDROP") {
 			await readDeviceParams(dev);
 		} else {
 			renderUI(eqState);
