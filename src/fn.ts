@@ -580,7 +580,6 @@ export async function autoConnectDevice() {
 export function adjustBandsForDevice(dev: HIDDevice | null) {
 	const stripsContainer = document.getElementById("eqStrips");
 	if (!dev) {
-		eqState = defaultEqState();
 		if (stripsContainer) {
 			stripsContainer.innerHTML = "";
 			stripsContainer.style.removeProperty("--bands-count");
@@ -592,13 +591,15 @@ export function adjustBandsForDevice(dev: HIDDevice | null) {
 
 	const protocol = getProtocol(dev);
 	if (protocol === "FIIO_JA11") {
-		eqState = [
-			{ index: 0, freq: 100, gain: 0, q: 0.7, type: "PK", enabled: true },
-			{ index: 1, freq: 500, gain: 0, q: 0.7, type: "PK", enabled: true },
-			{ index: 2, freq: 1000, gain: 0, q: 0.7, type: "PK", enabled: true },
-			{ index: 3, freq: 2500, gain: 0, q: 0.7, type: "PK", enabled: true },
-			{ index: 4, freq: 10000, gain: 0, q: 0.7, type: "PK", enabled: true },
-		] as EQ;
+		if (eqState.length !== 5) {
+			eqState = [
+				{ index: 0, freq: 100, gain: 0, q: 0.7, type: "PK", enabled: true },
+				{ index: 1, freq: 500, gain: 0, q: 0.7, type: "PK", enabled: true },
+				{ index: 2, freq: 1000, gain: 0, q: 0.7, type: "PK", enabled: true },
+				{ index: 3, freq: 2500, gain: 0, q: 0.7, type: "PK", enabled: true },
+				{ index: 4, freq: 10000, gain: 0, q: 0.7, type: "PK", enabled: true },
+			] as EQ;
+		}
 		if (stripsContainer) {
 			stripsContainer.innerHTML = "";
 			stripsContainer.style.setProperty("--bands-count", "5");
@@ -606,7 +607,9 @@ export function adjustBandsForDevice(dev: HIDDevice | null) {
 			stripsContainer.style.setProperty("--bands-count-mobile", "2");
 		}
 	} else {
-		eqState = defaultEqState();
+		if (eqState.length !== 10) {
+			eqState = defaultEqState();
+		}
 		if (stripsContainer) {
 			stripsContainer.innerHTML = "";
 			stripsContainer.style.removeProperty("--bands-count");

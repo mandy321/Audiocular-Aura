@@ -497,8 +497,10 @@ export async function flashToFlash() {
 		logTx(2, packet);
 		await device.sendReport(2, packet);
 	} else if (protocol === "MOONDROP") {
-		const packet = new Uint8Array([CMD_MOON.WRITE, CMD_MOON.SAVE_FLASH]);
-		await device.sendReport(REPORT_ID_DEFAULT, packet);
+		const packet = new Uint8Array(64);
+		packet[0] = CMD_MOON.WRITE;
+		packet[1] = CMD_MOON.SAVE_FLASH;
+		await device.sendReport(0, packet);
 	} else {
 		// Savitech Flash Save
 		await sendPacketSavitech(device, [
@@ -576,7 +578,7 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
 	const coeffs = encodeBiquadMoondrop(band.type, band.freq, gain, band.q);
 	const typeMap = { PK: 2, LSQ: 1, HSQ: 3 };
 
-	const packet = new Uint8Array(63);
+	const packet = new Uint8Array(64);
 	packet[0] = CMD_MOON.WRITE;
 	packet[1] = CMD_MOON.UPDATE_EQ;
 	packet[2] = 0x18;
@@ -598,19 +600,19 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
 	packet[32] = (gainVal >> 8) & 255;
 
 	packet[33] = typeMap[band.type as keyof typeof typeMap] || 2;
-	packet[35] = REPORT_ID_DEFAULT;
+	packet[35] = 0;
 
-	await device.sendReport(REPORT_ID_DEFAULT, packet);
+	await device.sendReport(0, packet);
 
 	// Coefficients trigger packet
-	const enablePacket = new Uint8Array(63);
+	const enablePacket = new Uint8Array(64);
 	enablePacket[0] = CMD_MOON.WRITE;
 	enablePacket[1] = CMD_MOON.UPDATE_EQ_COEFF;
 	enablePacket[2] = band.index;
 	enablePacket[4] = 255;
 	enablePacket[5] = 255;
 	enablePacket[6] = 255;
-	await device.sendReport(REPORT_ID_DEFAULT, enablePacket);
+	await device.sendReport(0, enablePacket);
 }
 
 /**
@@ -618,14 +620,13 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
  */
 async function setGlobalGainMoondrop(device: HIDDevice, gain: number) {
 	const val = Math.round(gain * 256);
-	const packet = new Uint8Array([
-		CMD_MOON.WRITE,
-		CMD_MOON.PRE_GAIN,
-		0,
-		val & 255,
-		(val >> 8) & 255,
-	]);
-	await device.sendReport(REPORT_ID_DEFAULT, packet);
+	const packet = new Uint8Array(64);
+	packet[0] = CMD_MOON.WRITE;
+	packet[1] = CMD_MOON.PRE_GAIN;
+	packet[2] = 0;
+	packet[3] = val & 255;
+	packet[4] = (val >> 8) & 255;
+	await device.sendReport(0, packet);
 }
 
 /**
@@ -842,7 +843,7 @@ function computeIIRFilter(type: string, freq: number, gain: number, q: number) {
  * Moondrop DSP Math: coefficients encoding
  */
 function encodeBiquadMoondrop(type: string, freq: number, gain: number, q: number) {
-	const fs = 96000;
+	const fs = 48000;
 	const coeffs = computeBiquadCoeffs(type, freq, gain, q, fs);
 	const s = 1073741824;
 
