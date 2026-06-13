@@ -872,12 +872,23 @@ btnSubmitReport?.addEventListener("click", async () => {
 	const reportPid = (document.getElementById("reportPid") as HTMLInputElement)?.value || "0x0000";
 	const reportProtocol = (document.getElementById("reportProtocol") as HTMLSelectElement)?.value || "SAVITECH";
 	
+	const logConsole = document.getElementById("logConsole");
+	let consoleLogs = "";
+	if (logConsole) {
+		const lines = Array.from(logConsole.querySelectorAll("div")).map((div) => div.innerText);
+		consoleLogs = lines.length > 0 ? lines.join("\n") : logConsole.innerText;
+	}
+
 	const formattedReport = 
 		`### Unknown Device Report\n` +
 		`- **Device Name:** ${reportProductName}\n` +
 		`- **Vendor ID (VID):** ${reportVid}\n` +
 		`- **Product ID (PID):** ${reportPid}\n` +
 		`- **Successfully Used Protocol:** ${reportProtocol}\n\n` +
+		`### System Messages Console Logs\n` +
+		`\`\`\`text\n` +
+		`${consoleLogs}\n` +
+		`\`\`\`\n\n` +
 		`*(Report generated automatically by AuraPEQ)*`;
 		
 	try {
@@ -893,7 +904,7 @@ btnSubmitReport?.addEventListener("click", async () => {
 			document.execCommand("copy");
 			document.body.removeChild(textarea);
 		}
-		log(`[System] Device report copied to clipboard!`);
+		log(`[System] Device report (including console logs) copied to clipboard!`);
 	} catch (err) {
 		log(`[System] Failed to copy report: ${(err as Error).message}`);
 	}
@@ -905,7 +916,8 @@ btnSubmitReport?.addEventListener("click", async () => {
 		`- **Vendor ID (VID):** ${reportVid}\n` +
 		`- **Product ID (PID):** ${reportPid}\n` +
 		`- **Protocol:** ${reportProtocol}\n\n` +
-		`*(Please paste the copied clipboard content below if different)*`
+		`**Please paste the copied clipboard contents (which contains the full report and console logs) below:**\n` +
+		`[PASTE HERE]\n`
 	);
 	
 	const githubUrl = `https://github.com/mandy321/Audiocular-Aura/issues/new?title=${title}&body=${body}`;
@@ -913,7 +925,7 @@ btnSubmitReport?.addEventListener("click", async () => {
 	
 	modalReportDevice?.classList.add("hidden");
 	
-	alert(`Report copied to clipboard! Opening pre-filled GitHub issue page...`);
+	alert(`Report and console logs copied to clipboard! Opening pre-filled GitHub issue page...`);
 });
 
 
