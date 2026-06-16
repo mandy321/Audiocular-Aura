@@ -2,7 +2,7 @@
 
 > **A premium, browser-based hardware DSP controller.** Tune the integrated Parametric Equalizer (PEQ) on your Audiocular Aura and other compatible DSP DACs directly over WebHID.
 
-[![License](https://img.shields.io/github/license/mandy321/Audiocular-Aura?style=flat-square&color=blue)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/Live%20App-Demo-brightgreen?style=flat-square)](https://mandy321.github.io/Audiocular-Aura/)
 [![Tech Stack](https://img.shields.io/badge/Stack-TypeScript%20%7C%20CSS-blueviolet?style=flat-square)](#-tech-stack)
 
