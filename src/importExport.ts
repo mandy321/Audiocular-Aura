@@ -237,8 +237,9 @@ export async function importProfile(e: Event) {
 				log(`Syncing imported profile to DAC...`);
 				await syncToDevice();
 				log(`Synced: ${name}`);
-			} else {
-				log("Profile imported successfully. Connect DAC and click SYNC to apply.");
+			}
+			if (typeof (window as any).pushHistory === "function") {
+				(window as any).pushHistory();
 			}
 		} catch (err) {
 			log(`Import Error: ${(err as Error).message}`);
@@ -301,8 +302,9 @@ export async function loadProfileFromText(content: string, presetName?: string) 
 			log(`Syncing preset "${name}" to DAC...`);
 			await syncToDevice();
 			log(`Synced: ${name}`);
-		} else {
-			log(`Preset loaded. Connect DAC to sync.`);
+		}
+		if (typeof (window as any).pushHistory === "function") {
+			(window as any).pushHistory();
 		}
 	} catch (err) {
 		log(`AutoEq Parsing Error: ${(err as Error).message}`);

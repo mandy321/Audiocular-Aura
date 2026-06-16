@@ -19,6 +19,18 @@ import {
 	getDevice,
 	autoConnectDevice,
 	saveCustomProfile,
+	undo,
+	redo,
+	toggleABCompare,
+	initHistory,
+	initSlots,
+	loadNextProfile,
+	loadPrevProfile,
+	resetBand,
+	toggleBandEnabled,
+	getFocusedBandIndex,
+	getEqState,
+	renderUI,
 } from "./fn.ts";
 import { setGlobalGain, log } from "./helpers.ts";
 import { exportProfile, exportProfileAsText, importProfile } from "./importExport.ts";
@@ -29,6 +41,7 @@ import {
 	type AutoEqPreset,
 } from "./autoeq.ts";
 import { KNOWN_DACS, activeDacs, setActiveDacs, type IdentifiedDac } from "./constants.ts";
+import { applyTranslations, getCurrentLang, setCurrentLang } from "./i18n.ts";
 
 export type Band = {
 	index: number;
@@ -926,6 +939,139 @@ btnSubmitReport?.addEventListener("click", async () => {
 	modalReportDevice?.classList.add("hidden");
 	
 	alert(`Report and console logs copied to clipboard! Opening pre-filled GitHub issue page...`);
+});
+
+/**
+ * UNDO / REDO / COMPARE BUTTONS
+ */
+const btnUndo = document.getElementById("btnUndo");
+const btnRedo = document.getElementById("btnRedo");
+const btnABCompare = document.getElementById("btnABCompare");
+
+btnUndo?.addEventListener("click", () => undo());
+btnRedo?.addEventListener("click", () => redo());
+btnABCompare?.addEventListener("click", () => toggleABCompare());
+
+/**
+ * KEYBOARD SHORTCUTS HELP MODAL
+ */
+const btnShortcuts = document.getElementById("btnShortcuts");
+const modalShortcuts = document.getElementById("modalShortcuts");
+const btnCloseShortcutsModal = document.getElementById("btnCloseShortcutsModal");
+
+btnShortcuts?.addEventListener("click", () => {
+	modalShortcuts?.classList.remove("hidden");
+});
+
+btnCloseShortcutsModal?.addEventListener("click", () => {
+	modalShortcuts?.classList.add("hidden");
+});
+
+window.addEventListener("click", (e) => {
+	if (e.target === modalShortcuts) {
+		modalShortcuts?.classList.add("hidden");
+	}
+});
+
+/**
+ * LANGUAGE SWITCHING
+ */
+const selLanguage = document.getElementById("selLanguage") as HTMLSelectElement;
+selLanguage?.addEventListener("change", () => {
+	const lang = selLanguage.value;
+	setCurrentLang(lang);
+	applyTranslations();
+	renderUI(getEqState());
+	log(`[System] Language set to: ${lang.toUpperCase()}`);
+});
+
+// Sync language select dropdown and initialize stacks on load
+window.addEventListener("load", () => {
+	initHistory();
+	initSlots();
+	applyTranslations();
+	if (selLanguage) {
+		selLanguage.value = getCurrentLang();
+	}
+});
+
+/**
+ * GLOBAL KEYBOARD SHORTCUTS
+ */
+window.addEventListener("keydown", (e: KeyboardEvent) => {
+	const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+	const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+	
+	// Avoid triggering shortcuts if user is typing in an input or textarea
+	const activeEl = document.activeElement;
+	if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.tagName === "SELECT")) {
+		if (!cmdOrCtrl) {
+			return;
+		}
+	}
+
+	const key = e.key.toLowerCase();
+
+	if (cmdOrCtrl) {
+		if (key === "z") {
+			e.preventDefault();
+			if (e.shiftKey) {
+				redo();
+			} else {
+				undo();
+			}
+		} else if (key === "y") {
+			e.preventDefault();
+			redo();
+		} else if (key === "b") {
+			e.preventDefault();
+			toggleABCompare();
+		} else if (key === "s") {
+			e.preventDefault();
+			if (e.shiftKey) {
+				flashToFlash();
+			} else {
+				syncToDevice();
+			}
+		} else if (key === "[") {
+			e.preventDefault();
+			loadPrevProfile();
+		} else if (key === "]") {
+			e.preventDefault();
+			loadNextProfile();
+		}
+	} else {
+		// Non-modifier shortcuts
+		if (e.key === "r") {
+			const focused = getFocusedBandIndex();
+			if (focused !== -1) {
+				e.preventDefault();
+				resetBand(focused);
+			}
+		} else if (e.key === "R") { // Shift+R
+			e.preventDefault();
+			resetToDefaults();
+		} else if (key === "e") {
+			const focused = getFocusedBandIndex();
+			if (focused !== -1) {
+				e.preventDefault();
+				toggleBandEnabled(focused);
+			}
+		} else if (e.key === "Escape") {
+			let closedAny = false;
+			const modals = ["modalSupportedDacs", "modalReportDevice", "modalShortcuts"];
+			modals.forEach(id => {
+				const modal = document.getElementById(id);
+				if (modal && !modal.classList.contains("hidden")) {
+					modal.classList.add("hidden");
+					closedAny = true;
+				}
+			});
+			if (closedAny) {
+				e.preventDefault();
+			}
+		}
+	}
 });
 
 

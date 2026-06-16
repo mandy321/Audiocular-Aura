@@ -417,7 +417,12 @@ export function renderPEQ(
 		});
 
 		window.addEventListener("mouseup", () => {
-			draggingIndex = null;
+			if (draggingIndex !== null) {
+				draggingIndex = null;
+				if (typeof (window as any).pushHistory === "function") {
+					(window as any).pushHistory();
+				}
+			}
 		});
 	}
 

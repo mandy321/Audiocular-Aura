@@ -27,12 +27,20 @@
         <h1 class="main-title">🎧 AuraPEQ</h1>
         <p class="subtitle">Audiocular Aura & Multi-DAC Hardware DSP Controller</p>
       </div>
-      <div class="chipset-badge-container" style="display: flex; align-items: center; gap: 8px;">
+      <div class="chipset-badge-container" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
         <button id="btnInstallApp" class="btn btn-accent hidden" style="font-size: 0.75rem; padding: 6px 12px; height: 30px;" aria-label="Install App as PWA">INSTALL APP 📲</button>
         <div class="chipset-badge">
           <span>Audiocular (CB5100) • Moondrop (CT7601) • FiiO DSP</span>
         </div>
-        <button id="btnShowSupportedDacs" class="btn btn-secondary-text" style="font-size: 0.75rem; padding: 4px 8px; height: 30px;" aria-label="Show supported DACs database">Supported DACs List 📋</button>
+        <button id="btnShowSupportedDacs" class="btn btn-secondary-text" style="font-size: 0.75rem; padding: 4px 8px; height: 30px;" aria-label="Show supported DACs database" data-i18n="supported_dacs_list">Supported DACs List 📋</button>
+        <div class="lang-select-wrapper">
+          <select id="selLanguage" class="lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+            <option value="zh">中文</option>
+          </select>
+        </div>
       </div>
     </header>
 
@@ -40,8 +48,8 @@
     <div id="hidSupportAlert" class="alert-banner hidden">
       <div class="alert-icon">⚠️</div>
       <div class="alert-content">
-        <strong class="alert-title">Browser Compatibility Warning</strong>
-        <span class="alert-text">WebHID is not supported by your current browser. To write settings directly to your Audiocular Aura DAC hardware, please use a desktop Chromium-based browser like Google Chrome, Microsoft Edge, Opera, or Brave. You can still test the interactive EQ visualizer and import/export presets in Demo Mode below.</span>
+        <strong class="alert-title" data-i18n="compat_warn_title">Browser Compatibility Warning</strong>
+        <span class="alert-text" data-i18n="compat_warn_text">WebHID is not supported by your current browser. To write settings directly to your Audiocular Aura DAC hardware, please use a desktop Chromium-based browser like Google Chrome, Microsoft Edge, Opera, or Brave. You can still test the interactive EQ visualizer and import/export presets in Demo Mode below.</span>
       </div>
     </div>
 
@@ -53,24 +61,24 @@
         <!-- Connection Controls -->
         <div class="control-row flex-wrap">
           <div class="connection-group">
-            <button id="btnConnect" class="btn btn-primary" aria-label="Connect to Audiocular Aura DAC">CONNECT DAC</button>
+            <button id="btnConnect" class="btn btn-primary" aria-label="Connect to Audiocular Aura DAC" data-i18n="connect_dac">CONNECT DAC</button>
             <div id="disconnectSection" class="disconnect-wrapper" style="display: none;">
-              <button id="btnDisconnect" class="btn btn-danger" aria-label="Disconnect DAC">DISCONNECT</button>
+              <button id="btnDisconnect" class="btn btn-danger" aria-label="Disconnect DAC" data-i18n="disconnect_dac">DISCONNECT</button>
             </div>
-            <span id="statusBadge" class="badge badge-offline">OFFLINE</span>
+            <span id="statusBadge" class="badge badge-offline" data-i18n="status_offline">OFFLINE</span>
             <span id="fwVersion" class="fw-text"></span>
           </div>
 
           <!-- Last Applied EQ Display -->
           <div class="active-eq-group">
-            <span class="active-eq-label">Last Applied EQ to DAC:</span>
-            <span id="lastAppliedEqDisplay" class="active-eq-value">Flat Profile (Default)</span>
+            <span class="active-eq-label" data-i18n="last_applied_eq_label">Last Applied EQ to DAC:</span>
+            <span id="lastAppliedEqDisplay" class="active-eq-value" data-i18n="flat_profile_default">Flat Profile (Default)</span>
           </div>
 
           <!-- Preamp Gain -->
           <div class="preamp-group">
             <div class="preamp-labels">
-              <span class="preamp-title">Pre-Amp Gain</span>
+              <span class="preamp-title" data-i18n="preamp_title">Pre-Amp Gain</span>
               <span id="globalGainDisplay" class="preamp-value">0 dB</span>
               <span id="preampAppliedNote" class="preamp-applied-note" style="display: none;"></span>
             </div>
@@ -149,9 +157,25 @@
 
       <!-- Visualizer Graph Card -->
       <section class="control-card visualizer-card">
-        <div class="card-header">
-          <h2 class="card-title">Real-Time PEQ Response Curve</h2>
-          <p class="card-subtitle">Drag the interactive handles to adjust frequency and gain in real-time.</p>
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 class="card-title" data-i18n="visualizer_title">Real-Time PEQ Response Curve</h2>
+            <p class="card-subtitle" data-i18n="visualizer_subtitle">Drag the interactive handles to adjust frequency and gain in real-time.</p>
+          </div>
+          <div class="graph-actions button-group" style="display: flex; gap: 8px;">
+            <button id="btnUndo" class="btn btn-secondary btn-sm" disabled aria-label="Undo last action">
+              <span class="icon">↶</span> <span data-i18n="btn_undo">UNDO</span>
+            </button>
+            <button id="btnRedo" class="btn btn-secondary btn-sm" disabled aria-label="Redo last action">
+              <span class="icon">↷</span> <span data-i18n="btn_redo">REDO</span>
+            </button>
+            <button id="btnABCompare" class="btn btn-secondary btn-sm" aria-label="A/B Compare slots">
+              <span class="icon">⚖️</span> <span data-i18n="btn_compare">COMPARE:</span> <span id="abStateLabel">A</span>
+            </button>
+            <button id="btnShortcuts" class="btn btn-secondary btn-sm" aria-label="Show Keyboard Shortcuts">
+              <span class="icon">⌨️</span> <span data-i18n="btn_shortcuts">SHORTCUTS</span>
+            </button>
+          </div>
         </div>
         <div class="canvas-wrapper-full">
           <canvas id="eqCanvas" class="peq-canvas"></canvas>
@@ -161,8 +185,8 @@
       <!-- EQ Strips Card (Showing all 10 bands side-by-side) -->
       <section class="control-card strips-card">
         <div class="card-header">
-          <h2 class="card-title">EQ Bands Controller</h2>
-          <p class="card-subtitle">Adjust parametric values for each of the 10 DSP bands.</p>
+          <h2 class="card-title" data-i18n="bands_title">EQ Bands Controller</h2>
+          <p class="card-subtitle" data-i18n="bands_subtitle">Adjust parametric values for each of the 10 DSP bands.</p>
         </div>
         <div id="eqStrips" class="eq-strips-grid">
           <!-- Rendered dynamically by fn.ts -->
@@ -176,15 +200,15 @@
           <!-- Preset and Preset File Utilities Card -->
           <section class="control-card utilities-card" style="margin-bottom: 0; flex: 1;">
             <div class="card-header">
-              <h2 class="card-title">Preset Utilities</h2>
-              <p class="card-subtitle">Import or export preset profiles.</p>
+              <h2 class="card-title" data-i18n="preset_utilities_title">Preset Utilities</h2>
+              <p class="card-subtitle" data-i18n="preset_utilities_subtitle">Import or export preset profiles.</p>
             </div>
             <div class="button-group flex-wrap">
-              <button id="btnReset" class="btn btn-secondary reset" disabled aria-label="Reset EQ to flat settings">RESET DEFAULTS</button>
-              <button id="btnResetFlat" class="btn btn-secondary reset" disabled aria-label="Reset all EQ bands to flat neutral values">RESET TO FLAT</button>
-              <button id="btnImport" class="btn btn-secondary" aria-label="Import EQ Preset file">IMPORT PRESET</button>
-              <button id="btnExport" class="btn btn-secondary" disabled aria-label="Export EQ Preset as JSON file">EXPORT JSON</button>
-              <button id="btnExportTxt" class="btn btn-secondary" disabled aria-label="Export EQ Preset as AutoEq parametric text file">EXPORT TEXT</button>
+              <button id="btnReset" class="btn btn-secondary reset" disabled aria-label="Reset EQ to flat settings" data-i18n="btn_reset_defaults">RESET DEFAULTS</button>
+              <button id="btnResetFlat" class="btn btn-secondary reset" disabled aria-label="Reset all EQ bands to flat neutral values" data-i18n="btn_reset_flat">RESET TO FLAT</button>
+              <button id="btnImport" class="btn btn-secondary" aria-label="Import EQ Preset file" data-i18n="btn_import_preset">IMPORT PRESET</button>
+              <button id="btnExport" class="btn btn-secondary" disabled aria-label="Export EQ Preset as JSON file" data-i18n="btn_export_json">EXPORT JSON</button>
+              <button id="btnExportTxt" class="btn btn-secondary" disabled aria-label="Export EQ Preset as AutoEq parametric text file" data-i18n="btn_export_text">EXPORT TEXT</button>
               <input type="file" id="fileInput" accept=".json,.txt" style="display: none;" aria-hidden="true">
             </div>
 
@@ -193,12 +217,12 @@
           <!-- My Custom Profiles Card -->
           <section class="control-card custom-profiles-card" style="flex: 1;">
             <div class="card-header">
-              <h2 class="card-title">My Custom Profiles</h2>
-              <p class="card-subtitle">Save & load profiles from local memory.</p>
+              <h2 class="card-title" data-i18n="custom_profiles_title">My Custom Profiles</h2>
+              <p class="card-subtitle" data-i18n="custom_profiles_subtitle">Save & load profiles from local memory.</p>
             </div>
             <div class="profile-save-wrapper" style="display: flex; gap: 10px; margin-bottom: 15px;">
-              <input type="text" id="customProfileName" class="premium-input" placeholder="Profile name..." style="flex: 1;">
-              <button id="btnSaveProfile" class="btn btn-primary" aria-label="Save custom profile">SAVE</button>
+              <input type="text" id="customProfileName" class="premium-input" placeholder="Profile name..." style="flex: 1;" data-i18n-placeholder="input_profile_name_placeholder">
+              <button id="btnSaveProfile" class="btn btn-primary" aria-label="Save custom profile" data-i18n="btn_save_profile">SAVE</button>
             </div>
             <div id="customProfilesList" class="custom-profiles-list">
               <!-- Rendered dynamically -->
@@ -209,12 +233,12 @@
         <!-- AutoEq Online Database Card -->
         <section class="control-card autoeq-card">
           <div class="card-header">
-            <h2 class="card-title">AutoEq Online Database</h2>
-            <p class="card-subtitle">Search and apply settings for thousands of headphones & IEMs.</p>
+            <h2 class="card-title" data-i18n="autoeq_title">AutoEq Online Database</h2>
+            <p class="card-subtitle" data-i18n="autoeq_subtitle">Search and apply settings for thousands of headphones & IEMs.</p>
           </div>
           <div class="autoeq-search-wrapper">
             <div class="search-input-container">
-              <input type="text" id="autoeqSearch" class="premium-input" placeholder="Search headphone model... (e.g. Zero RED)" autocomplete="off">
+              <input type="text" id="autoeqSearch" class="premium-input" placeholder="Search headphone model... (e.g. Zero RED)" autocomplete="off" data-i18n-placeholder="input_search_placeholder">
               <button id="btnRefreshAutoEq" class="btn btn-secondary-icon" title="Force refresh database index" aria-label="Refresh database">🔄</button>
             </div>
             <div id="autoeqSearchResults" class="search-dropdown hidden">
@@ -234,13 +258,13 @@
         <!-- Hardware Flashing Control Panel -->
         <section class="control-card sync-card">
           <div class="card-header">
-            <h2 class="card-title">Hardware Memory Controls</h2>
-            <p class="card-subtitle">Apply settings in real-time or flash them permanently.</p>
+            <h2 class="card-title" data-i18n="hardware_controls_title">Hardware Memory Controls</h2>
+            <p class="card-subtitle" data-i18n="hardware_controls_subtitle">Apply settings in real-time or flash them permanently.</p>
           </div>
           <div class="sync-actions">
-            <button id="btnSync" class="btn btn-accent action" disabled aria-label="Sync current EQ settings to DAC RAM">SYNC TO RAM (APPLY)</button>
-            <button id="btnSendToDevice" class="btn btn-primary action" disabled aria-label="Send current EQ settings to device">SEND TO DEVICE</button>
-            <button id="btnFlash" class="btn btn-highlight action" disabled aria-label="Write current EQ settings permanently to DAC Flash">SAVE TO FLASH (PERMANENT)</button>
+            <button id="btnSync" class="btn btn-accent action" disabled aria-label="Sync current EQ settings to DAC RAM" data-i18n="btn_sync_ram">SYNC TO RAM (APPLY)</button>
+            <button id="btnSendToDevice" class="btn btn-primary action" disabled aria-label="Send current EQ settings to device" data-i18n="btn_send_device">SEND TO DEVICE</button>
+            <button id="btnFlash" class="btn btn-highlight action" disabled aria-label="Write current EQ settings permanently to DAC Flash" data-i18n="btn_save_flash">SAVE TO FLASH (PERMANENT)</button>
           </div>
         </section>
       </div>
@@ -459,6 +483,72 @@
           <button id="btnSubmitReport" class="btn btn-primary" aria-label="Copy Report and Open GitHub">Generate Report & Open GitHub</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal Dialog -->
+  <div id="modalShortcuts" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="modal_shortcuts_title">⌨️ Keyboard Shortcuts</h3>
+        <button id="btnCloseShortcutsModal" class="btn-close-modal" aria-label="Close shortcuts list">✖</button>
+      </div>
+      <p class="modal-desc" data-i18n="modal_shortcuts_desc">Use the following keyboard shortcuts to control AuraPEQ without a mouse:</p>
+      
+      <table class="shortcuts-table">
+        <thead>
+          <tr>
+            <th data-i18n="shortcut_header_action">Action</th>
+            <th data-i18n="shortcut_header_key">Shortcut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n="shortcut_undo">Undo Last Adjustment</td>
+            <td><kbd>Ctrl</kbd> + <kbd>Z</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>Z</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_redo">Redo Last Adjustment</td>
+            <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> <span class="kbd-or">/</span> <kbd>Ctrl</kbd> + <kbd>Y</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_ab">A/B Compare Toggle</td>
+            <td><kbd>Ctrl</kbd> + <kbd>B</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>B</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_reset_selected">Reset Focused Band</td>
+            <td><kbd>R</kbd> <span class="shortcut-tip">(when band is focused)</span></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_reset_all">Reset All Bands to Default</td>
+            <td><kbd>Shift</kbd> + <kbd>R</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_sync">Sync settings to RAM</td>
+            <td><kbd>Ctrl</kbd> + <kbd>S</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>S</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_flash">Save settings to Flash</td>
+            <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_prev_preset">Load Previous Custom Profile</td>
+            <td><kbd>Ctrl</kbd> + <kbd>[</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>[</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_next_preset">Load Next Custom Profile</td>
+            <td><kbd>Ctrl</kbd> + <kbd>]</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>]</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_toggle_band">Toggle Focused Band Enable</td>
+            <td><kbd>E</kbd> <span class="shortcut-tip">(when band is focused)</span></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_close">Close Modal</td>
+            <td><kbd>Esc</kbd></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

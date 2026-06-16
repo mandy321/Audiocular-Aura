@@ -13,6 +13,7 @@ import { readDeviceParams, setupListener, syncToDevice, queueRealtimeBandWrite, 
 import { enableControls, log, updateGlobalGainUI, refreshStripUI, updateGlobalGain, configurePreampUI } from "./helpers.ts";
 import type { Band, EQ } from "./main.ts";
 import { renderPEQ, resizeCanvas } from "./peq.ts";
+import { t } from "./i18n.ts";
 
 /**
  * STATE
@@ -21,6 +22,19 @@ let device: HIDDevice | null = null;
 let globalGainState: number = 0;
 let eqState: EQ = defaultEqState();
 let lastAppliedEqName: string = localStorage.getItem("last_applied_eq") || "Flat Profile (Default)";
+
+// Undo/Redo History Stacks
+let undoStack: Array<{ eqState: EQ; globalGainState: number }> = [];
+let redoStack: Array<{ eqState: EQ; globalGainState: number }> = [];
+const MAX_HISTORY_DEPTH = 50;
+
+// A/B Comparison States
+let activeSlot: "A" | "B" = "A";
+let slotA: { eqState: EQ; globalGainState: number } | null = null;
+let slotB: { eqState: EQ; globalGainState: number } | null = null;
+
+// Focused Band Index
+let focusedBandIndex: number = -1;
 
 export function getLastAppliedEqName() {
 	return lastAppliedEqName;
@@ -155,6 +169,216 @@ export function setEQ(
 	eqState[index][key] = value;
 }
 
+export function initHistory() {
+	undoStack = [];
+	redoStack = [];
+	pushHistory();
+}
+
+export function pushHistory() {
+	const snapshot = {
+		eqState: JSON.parse(JSON.stringify(eqState)) as EQ,
+		globalGainState: globalGainState
+	};
+
+	// Check if this snapshot is identical to the last one on the stack
+	if (undoStack.length > 0) {
+		const last = undoStack[undoStack.length - 1];
+		if (JSON.stringify(last.eqState) === JSON.stringify(snapshot.eqState) && last.globalGainState === snapshot.globalGainState) {
+			return; // Avoid duplicating state
+		}
+	}
+
+	undoStack.push(snapshot);
+	if (undoStack.length > MAX_HISTORY_DEPTH) {
+		undoStack.shift();
+	}
+	redoStack = []; // Clear redo stack on new action
+	updateUndoRedoButtons();
+}
+
+// Expose pushHistory on window for external triggers (e.g. peq visualizer drag ends)
+(window as any).pushHistory = pushHistory;
+
+export async function undo() {
+	if (undoStack.length <= 1) return; // Keep the initial baseline state
+
+	const current = undoStack.pop()!;
+	redoStack.push(current);
+
+	const previous = undoStack[undoStack.length - 1];
+	eqState = JSON.parse(JSON.stringify(previous.eqState)) as EQ;
+	globalGainState = previous.globalGainState;
+
+	renderUI(eqState);
+	updateGlobalGainUI(globalGainState);
+	
+	if (device) {
+		await syncToDevice();
+	}
+	updateUndoRedoButtons();
+}
+
+export async function redo() {
+	if (redoStack.length === 0) return;
+
+	const next = redoStack.pop()!;
+	undoStack.push(next);
+
+	eqState = JSON.parse(JSON.stringify(next.eqState)) as EQ;
+	globalGainState = next.globalGainState;
+
+	renderUI(eqState);
+	updateGlobalGainUI(globalGainState);
+
+	if (device) {
+		await syncToDevice();
+	}
+	updateUndoRedoButtons();
+}
+
+export function updateUndoRedoButtons() {
+	const btnUndo = document.getElementById("btnUndo") as HTMLButtonElement;
+	const btnRedo = document.getElementById("btnRedo") as HTMLButtonElement;
+
+	if (btnUndo) {
+		btnUndo.disabled = undoStack.length <= 1;
+	}
+	if (btnRedo) {
+		btnRedo.disabled = redoStack.length === 0;
+	}
+}
+
+export function initSlots() {
+	slotA = null;
+	slotB = null;
+	activeSlot = "A";
+	updateSlotLabel();
+}
+
+export async function toggleABCompare() {
+	const current = {
+		eqState: JSON.parse(JSON.stringify(eqState)) as EQ,
+		globalGainState: globalGainState
+	};
+
+	// Lazy initialization on first compare toggle: A = current, B = flat
+	if (!slotA && !slotB) {
+		slotA = JSON.parse(JSON.stringify(current));
+		slotB = {
+			eqState: defaultEqState(),
+			globalGainState: 0
+		};
+		activeSlot = "B";
+		
+		eqState = JSON.parse(JSON.stringify(slotB.eqState)) as EQ;
+		globalGainState = slotB.globalGainState;
+	} else {
+		// Save current state before toggle
+		if (activeSlot === "A") {
+			slotA = current;
+			activeSlot = "B";
+			eqState = JSON.parse(JSON.stringify(slotB!.eqState)) as EQ;
+			globalGainState = slotB!.globalGainState;
+		} else {
+			slotB = current;
+			activeSlot = "A";
+			eqState = JSON.parse(JSON.stringify(slotA!.eqState)) as EQ;
+			globalGainState = slotA!.globalGainState;
+		}
+	}
+
+	renderUI(eqState);
+	updateGlobalGainUI(globalGainState);
+
+	if (device) {
+		await syncToDevice();
+	}
+	updateSlotLabel();
+}
+
+function updateSlotLabel() {
+	const abStateLabel = document.getElementById("abStateLabel");
+	if (abStateLabel) {
+		abStateLabel.innerText = activeSlot;
+	}
+	const btnABCompare = document.getElementById("btnABCompare");
+	if (btnABCompare) {
+		if (activeSlot === "B") {
+			btnABCompare.classList.add("active");
+		} else {
+			btnABCompare.classList.remove("active");
+		}
+	}
+}
+
+export function getFocusedBandIndex() {
+	return focusedBandIndex;
+}
+
+export function setFocusedBand(index: number) {
+	if (focusedBandIndex === index) return;
+	focusedBandIndex = index;
+
+	const strips = document.querySelectorAll(".eq-strip");
+	strips.forEach((strip, i) => {
+		if (i === index) {
+			strip.classList.add("focused");
+		} else {
+			strip.classList.remove("focused");
+		}
+	});
+}
+
+export function resetBand(index: number) {
+	if (index < 0 || index >= eqState.length) return;
+	eqState[index].freq = DEFAULT_FREQS[index] || 1000;
+	eqState[index].gain = 0;
+	eqState[index].q = 0.75;
+	eqState[index].type = "PK";
+	eqState[index].enabled = true;
+
+	renderUI(eqState);
+	if (device) {
+		queueRealtimeBandWrite(device, eqState[index]);
+	}
+	pushHistory();
+}
+
+export function toggleBandEnabled(index: number) {
+	if (index < 0 || index >= eqState.length) return;
+	eqState[index].enabled = !eqState[index].enabled;
+
+	renderUI(eqState);
+	if (device) {
+		queueRealtimeBandWrite(device, eqState[index]);
+	}
+	pushHistory();
+}
+
+export function loadNextProfile() {
+	if (customProfiles.length === 0) return;
+	let index = -1;
+	if (lastAppliedEqName.startsWith("Profile: ")) {
+		const name = lastAppliedEqName.replace("Profile: ", "");
+		index = customProfiles.findIndex(p => p.name === name);
+	}
+	let nextIndex = (index + 1) % customProfiles.length;
+	loadCustomProfile(customProfiles[nextIndex].name);
+}
+
+export function loadPrevProfile() {
+	if (customProfiles.length === 0) return;
+	let index = -1;
+	if (lastAppliedEqName.startsWith("Profile: ")) {
+		const name = lastAppliedEqName.replace("Profile: ", "");
+		index = customProfiles.findIndex(p => p.name === name);
+	}
+	let prevIndex = index - 1;
+	if (prevIndex < 0) prevIndex = customProfiles.length - 1;
+	loadCustomProfile(customProfiles[prevIndex].name);
+}
+
 export function getGlobalGainState() {
 	return globalGainState;
 }
@@ -204,46 +428,52 @@ export function renderUI(eqState: EQ) {
 			stripsContainer.innerHTML = "";
 			eqState.forEach((band, i) => {
 				const div = document.createElement("div");
-				div.className = `eq-strip ${band.enabled ? "" : "bypassed"}`;
+				div.className = `eq-strip ${band.enabled ? "" : "bypassed"} ${i === focusedBandIndex ? "focused" : ""}`;
+				div.addEventListener("click", () => {
+					setFocusedBand(i);
+				});
+				div.addEventListener("focusin", () => {
+					setFocusedBand(i);
+				});
 				div.innerHTML = `
 					<div class="strip-header">
-						<h3 class="strip-title">BAND ${i + 1}</h3>
+						<h3 class="strip-title">${t("band") || "BAND"} ${i + 1}</h3>
 						<span class="strip-label">${DEFAULT_LABELS[i]}</span>
 					</div>
 					
 					<label class="switch">
-						<input type="checkbox" id="check-enabled-${i}" ${band.enabled ? "checked" : ""} onchange="window.updateState(${i}, 'enabled', this.checked)">
+						<input type="checkbox" id="check-enabled-${i}" ${band.enabled ? "checked" : ""} onchange="window.updateState(${i}, 'enabled', this.checked); window.pushHistory()">
 						<span class="slider"></span>
 					</label>
 
 					<div class="slider-container">
-						<span class="slider-label">Gain (dB)</span>
+						<span class="slider-label">${t("band_gain") || "Gain (dB)"}</span>
 						<input type="range" orient="vertical" min="-12" max="12" step="0.5" value="${band.gain}" 
-							oninput="window.updateState(${i}, 'gain', this.value)" ${device ? "" : "disabled"} class="vertical-slider">
+							oninput="window.updateState(${i}, 'gain', this.value)" onchange="window.pushHistory()" ${device ? "" : "disabled"} class="vertical-slider">
 						<div class="gain-input-wrapper">
 							<input type="number" value="${band.gain}" step="0.5" min="-12" max="12"
-								onchange="window.updateState(${i}, 'gain', this.value)" id="num-gain-${i}" ${device ? "" : "disabled"} class="strip-input font-mono" size="6">
+								onchange="window.updateState(${i}, 'gain', this.value); window.pushHistory()" id="num-gain-${i}" ${device ? "" : "disabled"} class="strip-input font-mono" size="6">
 						</div>
 					</div>
 
 					<div class="strip-field">
-						<label class="strip-field-label">Freq (Hz)</label>
+						<label class="strip-field-label">${t("band_freq") || "Freq (Hz)"}</label>
 						<input type="number" value="${band.freq}" min="20" max="20000" step="1"
-							onchange="window.updateState(${i}, 'freq', this.value)" id="num-freq-${i}" ${device ? "" : "disabled"} class="strip-input font-mono" size="6">
+							onchange="window.updateState(${i}, 'freq', this.value); window.pushHistory()" id="num-freq-${i}" ${device ? "" : "disabled"} class="strip-input font-mono" size="6">
 					</div>
 
 					<div class="strip-field">
-						<label class="strip-field-label">Q Factor</label>
+						<label class="strip-field-label">${t("band_q") || "Q Factor"}</label>
 						<input type="number" value="${band.q}" min="0.1" max="10" step="0.05"
-							onchange="window.updateState(${i}, 'q', this.value)" id="num-q-${i}" ${device ? "" : "disabled"} class="strip-input font-mono" size="6">
+							onchange="window.updateState(${i}, 'q', this.value); window.pushHistory()" id="num-q-${i}" ${device ? "" : "disabled"} class="strip-input font-mono" size="6">
 					</div>
 
 					<div class="strip-field">
-						<label class="strip-field-label">Type</label>
-						<select onchange="window.updateState(${i}, 'type', this.value)" id="sel-type-${i}" ${device ? "" : "disabled"} class="strip-select">
-							<option value="PK" ${band.type === "PK" ? "selected" : ""}>Peak</option>
-							<option value="LSQ" ${band.type === "LSQ" ? "selected" : ""}>Low Shelf</option>
-							<option value="HSQ" ${band.type === "HSQ" ? "selected" : ""}>High Shelf</option>
+						<label class="strip-field-label">${t("band_type") || "Type"}</label>
+						<select onchange="window.updateState(${i}, 'type', this.value); window.pushHistory()" id="sel-type-${i}" ${device ? "" : "disabled"} class="strip-select">
+							<option value="PK" ${band.type === "PK" ? "selected" : ""}>${t("band_type_peak") || "Peak"}</option>
+							<option value="LSQ" ${band.type === "LSQ" ? "selected" : ""}>${t("band_type_low") || "Low Shelf"}</option>
+							<option value="HSQ" ${band.type === "HSQ" ? "selected" : ""}>${t("band_type_high") || "High Shelf"}</option>
 						</select>
 					</div>
 				`;
@@ -472,6 +702,7 @@ export async function resetToDefaults() {
 
 	await syncToDevice();
 	log("Defaults applied and synced.");
+	pushHistory();
 }
 
 /**
@@ -498,6 +729,7 @@ export async function resetToFlat() {
 		await syncToDevice();
 	}
 	log("Flat neutral profile applied and synced.");
+	pushHistory();
 }
 
 /**
@@ -760,6 +992,7 @@ export async function loadCustomProfile(name: string) {
 	} else {
 		log("Profile loaded successfully. Connect DAC and click SYNC to apply.");
 	}
+	pushHistory();
 }
 
 export function renderCustomProfiles() {

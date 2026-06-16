@@ -150,7 +150,30 @@ export function log(msg: string) {
 	const consoleEl = document.getElementById("logConsole");
 	if (!consoleEl) return;
 	const timestamp = new Date().toLocaleTimeString();
-	consoleEl.innerHTML += `<div>[${timestamp}] ${msg}</div>`;
+
+	let translatedMsg = msg;
+	if (typeof (window as any).t === "function") {
+		const tFunc = (window as any).t;
+		if (msg === "Disconnected.") {
+			translatedMsg = tFunc("log_disconnected");
+		} else if (msg === "Defaults applied and synced.") {
+			translatedMsg = tFunc("log_defaults_applied");
+		} else if (msg === "Flat neutral profile applied and synced.") {
+			translatedMsg = tFunc("log_flat_applied");
+		} else if (msg === "Sync Complete.") {
+			translatedMsg = tFunc("log_sync_complete");
+		} else if (msg === "RAM Sync Successful.") {
+			translatedMsg = tFunc("log_ram_sync_success");
+		} else if (msg === "Flash Memory Write Successful.") {
+			translatedMsg = tFunc("log_flash_write_success");
+		} else if (msg.startsWith("[System] Connected:")) {
+			translatedMsg = msg.replace("[System] Connected:", tFunc("log_connected") + ":");
+		} else if (msg.startsWith("[System] Hardware factory reset")) {
+			translatedMsg = tFunc("log_factory_reset_sent");
+		}
+	}
+
+	consoleEl.innerHTML += `<div>[${timestamp}] ${translatedMsg}</div>`;
 	consoleEl.scrollTop = consoleEl.scrollHeight;
 }
 
