@@ -1,6 +1,6 @@
-# 🎧 AuraPEQ
+# 🎧 AuraPEQ — USB DAC EQ & Hardware Parametric Equalizer (PEQ) Controller
 
-> **A premium, browser-based hardware DSP controller.** Tune the integrated Parametric Equalizer (PEQ) on your Audiocular Aura and other compatible DSP DACs directly over WebHID.
+> **A premium, browser-based hardware DSP equalizer controller.** Configure the integrated 10-band Parametric Equalizer (PEQ) on your Audiocular Aura, Moondrop, FiiO, and other compatible USB DACs directly over WebHID. No background drivers or desktop app installs required!
 
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=flat-square)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/Live%20App-Demo-brightgreen?style=flat-square)](https://mandy321.github.io/Audiocular-Aura/)
@@ -80,6 +80,17 @@ npm run build
 3.  Load a preset from the **AutoEq Database**, My Custom Profiles, or adjust bands manually on the frequency visualizer.
 4.  Click **SYNC TO RAM** to test changes instantly.
 5.  Click **SAVE TO FLASH** to store your preset permanently on the DAC hardware.
+
+## 🏷️ Search & Indexing Keywords
+
+If you are looking for resources on equalizers or DAC configuration, this project covers:
+*   **DAC EQ / USB DAC Equalizer**: Configure audio tuning for Audiocular Aura, Fosi Audio, JCally, Moondrop, and FiiO.
+*   **Parametric Equalizer (PEQ) Equalizer**: Set up precise 10-band audio filter configurations (Gain, Freq, Q-factor) on hardware.
+*   **Hardware DSP Tuning**: Process high-fidelity audio filter math (peaking and shelving biquad filters) directly inside the DAC chip.
+*   **WebHID Equalizer**: Connect, read, and write device parameters directly from your web browser without installing local desktop apps.
+*   **Onboard Flash Flashing**: Save custom presets permanently to the internal memory of the USB audio controller.
+
+---
 
 ## 🛡️ License
 
