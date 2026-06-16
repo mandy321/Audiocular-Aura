@@ -942,6 +942,48 @@ btnSubmitReport?.addEventListener("click", async () => {
 });
 
 /**
+ * UPI SPONSOR MODAL & BUTTON LISTENERS
+ */
+const btnSponsorUpi = document.getElementById("btnSponsorUpi");
+const modalSponsorUpi = document.getElementById("modalSponsorUpi");
+const btnCloseSponsorUpi = document.getElementById("btnCloseSponsorUpi");
+const btnCopyUpiId = document.getElementById("btnCopyUpiId");
+const txtSponsorUpiId = document.getElementById("txtSponsorUpiId") as HTMLInputElement;
+
+btnSponsorUpi?.addEventListener("click", (e) => {
+	e.preventDefault();
+	modalSponsorUpi?.classList.remove("hidden");
+});
+
+btnCloseSponsorUpi?.addEventListener("click", () => {
+	modalSponsorUpi?.classList.add("hidden");
+});
+
+window.addEventListener("click", (e) => {
+	if (e.target === modalSponsorUpi) {
+		modalSponsorUpi?.classList.add("hidden");
+	}
+});
+
+btnCopyUpiId?.addEventListener("click", () => {
+	if (txtSponsorUpiId) {
+		navigator.clipboard.writeText(txtSponsorUpiId.value)
+			.then(() => {
+				const originalText = btnCopyUpiId.textContent || "Copy";
+				btnCopyUpiId.textContent = "Copied!";
+				btnCopyUpiId.classList.add("btn-accent");
+				setTimeout(() => {
+					btnCopyUpiId.textContent = originalText;
+					btnCopyUpiId.classList.remove("btn-accent");
+				}, 2000);
+			})
+			.catch((err) => {
+				console.error("Failed to copy UPI ID: ", err);
+			});
+	}
+});
+
+/**
  * UNDO / REDO / COMPARE BUTTONS
  */
 const btnUndo = document.getElementById("btnUndo");
@@ -1059,7 +1101,7 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 			}
 		} else if (e.key === "Escape") {
 			let closedAny = false;
-			const modals = ["modalSupportedDacs", "modalReportDevice", "modalShortcuts"];
+			const modals = ["modalSupportedDacs", "modalReportDevice", "modalShortcuts", "modalSponsorUpi"];
 			modals.forEach(id => {
 				const modal = document.getElementById(id);
 				if (modal && !modal.classList.contains("hidden")) {

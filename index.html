@@ -427,6 +427,23 @@
     <!-- Bottom Footer -->
     <footer class="app-footer">
       <p>&copy; 2026 AuraPEQ. Designed for the Audiocular Aura (CS43131 / SGM8262 / CB5100 chipset). Powered by WebHID.</p>
+      <div class="footer-sponsor-container">
+        <span data-i18n="support_project">Support AuraPEQ:</span>
+        <div class="sponsor-buttons">
+          <a href="https://github.com/sponsors/YOUR_USERNAME" target="_blank" class="sponsor-btn github" aria-label="Sponsor on GitHub">
+            <span class="sponsor-icon">❤️</span> Sponsor
+          </a>
+          <a href="https://ko-fi.com/YOUR_USERNAME" target="_blank" class="sponsor-btn kofi" aria-label="Support on Ko-fi">
+            <span class="sponsor-icon">☕</span> Ko-fi
+          </a>
+          <a href="https://buymeacoffee.com/YOUR_USERNAME" target="_blank" class="sponsor-btn bmc" aria-label="Support on Buy Me a Coffee">
+            <span class="sponsor-icon">⚡</span> Buy Me a Coffee
+          </a>
+          <button id="btnSponsorUpi" class="sponsor-btn upi" aria-label="Support via UPI (India)">
+            <span class="sponsor-icon">📱</span> UPI / QR Code
+          </button>
+        </div>
+      </div>
     </footer>
 
   </div>
@@ -483,6 +500,33 @@
           <button id="btnSubmitReport" class="btn btn-primary" aria-label="Copy Report and Open GitHub">Generate Report & Open GitHub</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- UPI Donation Modal Dialog -->
+  <div id="modalSponsorUpi" class="modal-overlay hidden">
+    <div class="modal-content text-center" style="max-width: 400px; text-align: center;">
+      <div class="modal-header">
+        <h3 class="modal-title">📱 Support via UPI (India)</h3>
+        <button id="btnCloseSponsorUpi" class="btn-close-modal" aria-label="Close donation dialog">✖</button>
+      </div>
+      <p class="modal-desc" style="margin-bottom: 20px;" data-i18n="upi_modal_desc">If you are based in India, you can support AuraPEQ directly via UPI with zero processing fees.</p>
+      
+      <!-- Placeholder UPI QR Code or bank vector -->
+      <div class="upi-qr-placeholder" style="margin: 20px auto; width: 180px; height: 180px; background: rgba(255, 255, 255, 0.05); border: 2px dashed var(--border-color); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+        <span style="font-size: 2.5rem; margin-bottom: 8px;">📲</span>
+        <span style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em;">Scan QR Code</span>
+      </div>
+      
+      <div class="input-field" style="margin-top: 15px;">
+        <label for="txtSponsorUpiId" data-i18n="upi_id_label">UPI ID</label>
+        <div style="display: flex; gap: 8px; margin-top: 5px;">
+          <input type="text" id="txtSponsorUpiId" class="premium-input font-mono" value="mtewatia67-1@okhdfcbank" readonly style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; text-align: center; flex: 1;">
+          <button id="btnCopyUpiId" class="btn btn-secondary" style="padding: 0 12px; font-size: 0.8rem;" data-i18n="copy">Copy</button>
+        </div>
+      </div>
+      
+      <p style="font-size: 0.7rem; color: var(--text-dim); margin-top: 15px; line-height: 1.4;" data-i18n="upi_disclaimer">Thank you so much! Every contribution directly supports new feature additions and hardware integrations.</p>
     </div>
   </div>
 

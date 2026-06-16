@@ -91,8 +91,11 @@ export const translations: Record<string, Record<string, string>> = {
 		log_defaults_applied: "Defaults applied and synced.",
 		log_flat_applied: "Flat neutral profile applied and synced.",
 		log_sync_complete: "Sync Complete.",
-		log_ram_sync_success: "RAM Sync Successful.",
-		log_flash_write_success: "Flash Memory Write Successful."
+		log_flash_write_success: "Flash Memory Write Successful.",
+		support_project: "Support AuraPEQ:",
+		upi_modal_desc: "If you are based in India, you can support AuraPEQ directly via UPI with zero processing fees.",
+		upi_id_label: "UPI ID",
+		upi_disclaimer: "Thank you so much! Every contribution directly supports new feature additions and hardware integrations."
 	},
 	es: {
 		supported_dacs_list: "Lista de DACs compatibles 📋",
@@ -182,8 +185,11 @@ export const translations: Record<string, Record<string, string>> = {
 		log_defaults_applied: "Valores predeterminados aplicados y sincronizados.",
 		log_flat_applied: "Perfil plano neutral aplicado y sincronizado.",
 		log_sync_complete: "Sincronización completada.",
-		log_ram_sync_success: "Sincronización a RAM exitosa.",
-		log_flash_write_success: "Escritura en memoria flash exitosa."
+		log_flash_write_success: "Escritura en memoria flash exitosa.",
+		support_project: "Apoye a AuraPEQ:",
+		upi_modal_desc: "Si se encuentra en la India, puede apoyar a AuraPEQ directamente a través de UPI con cero tarifas de procesamiento.",
+		upi_id_label: "UPI ID",
+		upi_disclaimer: "¡Muchas gracias! Cada contribución apoya directamente la adición de nuevas funciones e integraciones de hardware."
 	},
 	de: {
 		supported_dacs_list: "Liste unterstützter DACs 📋",
@@ -273,8 +279,11 @@ export const translations: Record<string, Record<string, string>> = {
 		log_defaults_applied: "Standardwerte angewendet und synchronisiert.",
 		log_flat_applied: "Flaches neutrales Profil angewendet und synchronisiert.",
 		log_sync_complete: "Synchronisierung abgeschlossen.",
-		log_ram_sync_success: "RAM-Synchronisierung erfolgreich.",
-		log_flash_write_success: "Erfolgreich in den Flash-Speicher geschrieben."
+		log_flash_write_success: "Erfolgreich in den Flash-Speicher geschrieben.",
+		support_project: "AuraPEQ unterstützen:",
+		upi_modal_desc: "Wenn Sie in Indien ansässig sind, können Sie AuraPEQ direkt über UPI ohne Bearbeitungsgebühren unterstützen.",
+		upi_id_label: "UPI-ID",
+		upi_disclaimer: "Vielen Dank! Jeder Beitrag unterstützt direkt das Hinzufügen neuer Funktionen und Hardware-Integrationen."
 	},
 	zh: {
 		supported_dacs_list: "支持的 DAC 列表 📋",
@@ -364,8 +373,11 @@ export const translations: Record<string, Record<string, string>> = {
 		log_defaults_applied: "默认值已应用并同步。",
 		log_flat_applied: "平直中性配置已应用并同步。",
 		log_sync_complete: "同步完成。",
-		log_ram_sync_success: "RAM 同步成功。",
-		log_flash_write_success: "闪存写入成功。"
+		log_flash_write_success: "闪存写入成功。",
+		support_project: "支持 AuraPEQ:",
+		upi_modal_desc: "如果您在印度，可以通过 UPI 直接支持 AuraPEQ，无需任何手续费。",
+		upi_id_label: "UPI 账号",
+		upi_disclaimer: "非常感谢！您的每一份捐赠都直接支持新功能的开发与硬件适配。"
 	}
 };
 

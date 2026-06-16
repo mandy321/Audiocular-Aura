@@ -3,7 +3,8 @@
 > **A premium, browser-based hardware DSP equalizer controller.** Configure the integrated 10-band Parametric Equalizer (PEQ) on your Audiocular Aura, Moondrop, FiiO, and other compatible USB DACs directly over WebHID. No background drivers or desktop app installs required!
 
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=flat-square)](LICENSE)
-[![Live Demo](https://img.shields.io/badge/Live%20App-Demo-brightgreen?style=flat-square)](https://mandy321.github.io/Audiocular-Aura/)
+[![Live App](https://img.shields.io/badge/Live%20App-Launch-brightgreen?style=flat-square)](https://mandy321.github.io/Audiocular-Aura/)
+[![Sponsor](https://img.shields.io/badge/Sponsor-Heart-ff69b4?style=flat-square&logo=github-sponsors)](https://github.com/sponsors/YOUR_USERNAME)
 [![Tech Stack](https://img.shields.io/badge/Stack-TypeScript%20%7C%20CSS-blueviolet?style=flat-square)](#-tech-stack)
 
 ---
@@ -89,6 +90,17 @@ If you are looking for resources on equalizers or DAC configuration, this projec
 *   **Hardware DSP Tuning**: Process high-fidelity audio filter math (peaking and shelving biquad filters) directly inside the DAC chip.
 *   **WebHID Equalizer**: Connect, read, and write device parameters directly from your web browser without installing local desktop apps.
 *   **Onboard Flash Flashing**: Save custom presets permanently to the internal memory of the USB audio controller.
+
+---
+
+## 💖 Support & Donations
+
+If AuraPEQ has helped you tune your DAC or headphones, please consider supporting the project! Your donations help maintain compatibility updates for new DAC models, keep the server database running, and support open-source development.
+
+*   **GitHub Sponsors (0% platform fees)**: [Sponsor on GitHub](https://github.com/sponsors/YOUR_USERNAME)
+*   **Ko-fi (0% fee, supports PayPal/Card)**: [Support on Ko-fi](https://ko-fi.com/YOUR_USERNAME)
+*   **Buy Me a Coffee**: [Support on Buy Me a Coffee](https://buymeacoffee.com/YOUR_USERNAME)
+*   **UPI (India)**: Scan or pay directly to the UPI ID: `mtewatia67-1@okhdfcbank`.
 
 ---
 
