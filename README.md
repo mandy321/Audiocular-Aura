@@ -95,12 +95,12 @@ If you are looking for resources on equalizers or DAC configuration, this projec
 
 ## 💖 Support & Donations
 
-If AuraPEQ has helped you tune your DAC or headphones, please consider supporting the project! Your donations help maintain compatibility updates for new DAC models, keep the server database running, and support open-source development.
+If AuraPEQ has helped you tune your DAC or headphones, please consider supporting the project! Your donations help maintain compatibility updates for new DAC models, support active development, and keep the project open-source.
 
 *   **GitHub Sponsors (0% platform fees)**: [Sponsor on GitHub](https://github.com/sponsors/YOUR_USERNAME)
 *   **Ko-fi (0% fee, supports PayPal/Card)**: [Support on Ko-fi](https://ko-fi.com/YOUR_USERNAME)
 *   **Buy Me a Coffee**: [Support on Buy Me a Coffee](https://buymeacoffee.com/YOUR_USERNAME)
-*   **UPI (India)**: Scan or pay directly to the UPI ID: `mtewatia67-1@okhdfcbank`.
+*   **UPI (India)**: Scan or pay directly to the UPI ID: `mtewatia67-1@okaxis`.
 
 ---
 
