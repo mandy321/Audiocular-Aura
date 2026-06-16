@@ -260,6 +260,17 @@ const lblTrebleTilt = document.getElementById("lblTrebleTilt") as HTMLElement;
 const tiltTextValue = document.getElementById("tiltTextValue") as HTMLElement;
 
 if (slideBassTilt && slideTrebleTilt && lblBassTilt && lblTrebleTilt && tiltTextValue) {
+	// Initialize tilt sliders and labels from saved states on load
+	const initialBass = (window as any).getBassTiltState?.() || 0;
+	const initialTreble = (window as any).getTrebleTiltState?.() || 0;
+
+	slideBassTilt.value = initialBass.toString();
+	slideTrebleTilt.value = initialTreble.toString();
+
+	lblBassTilt.innerText = `${initialBass >= 0 ? "+" : ""}${initialBass.toFixed(1)} dB`;
+	lblTrebleTilt.innerText = `${initialTreble >= 0 ? "+" : ""}${initialTreble.toFixed(1)} dB`;
+	tiltTextValue.innerText = `Bass: ${initialBass >= 0 ? "+" : ""}${initialBass.toFixed(1)} dB, Treble: ${initialTreble >= 0 ? "+" : ""}${initialTreble.toFixed(1)} dB`;
+
 	const updateTiltUI = async () => {
 		const bass = parseFloat(slideBassTilt.value);
 		const treble = parseFloat(slideTrebleTilt.value);

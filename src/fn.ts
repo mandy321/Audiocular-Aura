@@ -19,9 +19,23 @@ import { t } from "./i18n.ts";
  * STATE
  */
 let device: HIDDevice | null = null;
-let globalGainState: number = 0;
-let eqState: EQ = defaultEqState();
+
+// Retrieve persisted active EQ configuration
+const savedEq = localStorage.getItem("aura_active_eq_state");
+const savedGain = localStorage.getItem("aura_active_preamp_gain");
+const savedBassTilt = localStorage.getItem("aura_active_bass_tilt");
+const savedTrebleTilt = localStorage.getItem("aura_active_treble_tilt");
+const savedAutoPreamp = localStorage.getItem("aura_auto_preamp_enabled");
+const savedManualPreamp = localStorage.getItem("aura_active_manual_preamp");
+
+let globalGainState: number = savedGain !== null ? Number(savedGain) : 0;
+let eqState: EQ = savedEq ? JSON.parse(savedEq) : defaultEqState();
 let lastAppliedEqName: string = localStorage.getItem("last_applied_eq") || "Flat Profile (Default)";
+
+let bassTiltState: number = savedBassTilt !== null ? Number(savedBassTilt) : 0;
+let trebleTiltState: number = savedTrebleTilt !== null ? Number(savedTrebleTilt) : 0;
+let autoPreampEnabled: boolean = savedAutoPreamp === "true";
+let manualPreampState: number = savedManualPreamp !== null ? Number(savedManualPreamp) : 0;
 
 // Undo/Redo History Stacks
 let undoStack: Array<{ eqState: EQ; globalGainState: number }> = [];
@@ -437,6 +451,13 @@ export function defaultEqState(): EQ {
  * Trigger UI updates and EQ graph re-render
  */
 export function renderUI(eqState: EQ) {
+	// Save current active state to localStorage
+	localStorage.setItem("aura_active_eq_state", JSON.stringify(eqState));
+	localStorage.setItem("aura_active_preamp_gain", globalGainState.toString());
+	localStorage.setItem("aura_active_bass_tilt", bassTiltState.toString());
+	localStorage.setItem("aura_active_treble_tilt", trebleTiltState.toString());
+	localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
+
 	// 1. Render the PEQ Canvas Visualizer Graph
 	const visualizerContainer = document.querySelector(".canvas-wrapper-full");
 	if (visualizerContainer) {
@@ -1111,11 +1132,6 @@ export function renderCustomProfiles() {
 	});
 }
 
-let bassTiltState: number = 0;
-let trebleTiltState: number = 0;
-let autoPreampEnabled: boolean = false;
-let manualPreampState: number = 0;
-
 export function getBassTiltState() { return bassTiltState; }
 export function setBassTiltState(val: number) { bassTiltState = val; }
 export function getTrebleTiltState() { return trebleTiltState; }
@@ -1313,8 +1329,10 @@ export async function recalculateAutoPreamp() {
 
 export async function toggleAutoPreamp(enabled: boolean) {
 	autoPreampEnabled = enabled;
+	localStorage.setItem("aura_auto_preamp_enabled", enabled ? "true" : "false");
 	if (autoPreampEnabled) {
 		manualPreampState = globalGainState;
+		localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
 		const globalGainSlider = document.getElementById("globalGainSlider") as HTMLInputElement;
 		if (globalGainSlider) globalGainSlider.disabled = true;
 		await recalculateAutoPreamp();
@@ -1324,6 +1342,7 @@ export async function toggleAutoPreamp(enabled: boolean) {
 			globalGainSlider.disabled = false;
 		}
 		globalGainState = manualPreampState;
+		localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
 		await updateGlobalGain(globalGainState);
 	}
 }
