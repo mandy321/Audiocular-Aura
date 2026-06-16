@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="manifest" href="./manifest.json?v=4">
+  <meta name="theme-color" content="#8b5cf6">
+  
+  <!-- SEO Tags -->
+  <title>AuraPEQ - Audiocular Aura & Multi-DAC DSP Parametric Equalizer Controller</title>
+  <meta name="description" content="Unlock and configure the hardware-level 10-band Parametric Equalizer (PEQ) on your Audiocular Aura, Moondrop, FiiO, and other compatible DSP-enabled DACs. Save presets permanently to the internal DSP flash memory." />
+  <meta name="keywords" content="Audiocular Aura, Moondrop, FiiO, Tanchjim, JCally, CS43131, CT7601, CB5100, Parametric EQ, Hardware PEQ, WebHID, DSP Equalizer, DAC config" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="./assets/index.js"></script>
+  <link rel="stylesheet" href="./assets/index.css">
+</head>
+
+<body class="aura-app-theme">
+  <!-- Core Wrapper -->
+  <div class="app-wrapper">
+    
+    <!-- Top Branding Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <h1 class="main-title">🎧 AuraPEQ</h1>
+        <p class="subtitle">Audiocular Aura & Multi-DAC Hardware DSP Controller</p>
+      </div>
+      <div class="chipset-badge-container" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <button id="btnInstallApp" class="btn btn-accent hidden" style="font-size: 0.75rem; padding: 6px 12px; height: 30px;" aria-label="Install App as PWA">INSTALL APP 📲</button>
+        <div class="chipset-badge">
+          <span>Audiocular (CB5100) • Moondrop (CT7601) • FiiO DSP</span>
+        </div>
+        <button id="btnShowSupportedDacs" class="btn btn-secondary-text" style="font-size: 0.75rem; padding: 4px 8px; height: 30px;" aria-label="Show supported DACs database" data-i18n="supported_dacs_list">Supported DACs List 📋</button>
+        <div class="lang-select-wrapper">
+          <select id="selLanguage" class="lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+            <option value="zh">中文</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Browser Support Alert (WebHID verification banner) -->
+    <div id="hidSupportAlert" class="alert-banner hidden">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <strong class="alert-title" data-i18n="compat_warn_title">Browser Compatibility Warning</strong>
+        <span class="alert-text" data-i18n="compat_warn_text">WebHID is not supported by your current browser. To write settings directly to your Audiocular Aura DAC hardware, please use a desktop Chromium-based browser like Google Chrome, Microsoft Edge, Opera, or Brave. You can still test the interactive EQ visualizer and import/export presets in Demo Mode below.</span>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid Container -->
+    <main class="dashboard-grid">
+      
+      <!-- Top Control Bar Card -->
+      <section class="control-card connection-card">
+        <!-- Connection Controls -->
+        <div class="control-row flex-wrap">
+          <div class="connection-group">
+            <button id="btnConnect" class="btn btn-primary" aria-label="Connect to Audiocular Aura DAC" data-i18n="connect_dac">CONNECT DAC</button>
+            <div id="disconnectSection" class="disconnect-wrapper" style="display: none;">
+              <button id="btnDisconnect" class="btn btn-danger" aria-label="Disconnect DAC" data-i18n="disconnect_dac">DISCONNECT</button>
+            </div>
+            <span id="statusBadge" class="badge badge-offline" data-i18n="status_offline">OFFLINE</span>
+            <span id="fwVersion" class="fw-text"></span>
+          </div>
+
+          <!-- Last Applied EQ Display -->
+          <div class="active-eq-group">
+            <span class="active-eq-label" data-i18n="last_applied_eq_label">Last Applied EQ to DAC:</span>
+            <span id="lastAppliedEqDisplay" class="active-eq-value">Flat Profile (Default)</span>
+          </div>
+
+          <!-- Preamp Gain -->
+          <div class="preamp-group">
+            <div class="preamp-labels" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="preamp-title-col">
+                <span class="preamp-title" data-i18n="preamp_title">Pre-Amp Gain</span>
+                <span id="globalGainDisplay" class="preamp-value">0 dB</span>
+              </div>
+              <label class="auto-preamp-toggle-wrapper" style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px; color: rgba(255,255,255,0.7);">
+                <input type="checkbox" id="checkAutoPreamp" style="cursor: pointer;">
+                <span>Auto Preamp</span>
+              </label>
+            </div>
+            <div class="preamp-slider-wrapper">
+              <input type="range" id="globalGainSlider" min="-20" max="10" step="1" value="0" class="preamp-slider" disabled aria-label="Adjust Pre-Amp Gain">
+              <span id="preampStepIndicator" class="preamp-step-indicator">Connect DAC to enable controls</span>
+              <span id="preampAppliedNote" class="preamp-applied-note" style="display: none;"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Identified DAC Info Badge -->
+        <div id="dacBadgeContainer" class="dac-badge-card hidden">
+          <div class="dac-badge-header">
+            <span class="dac-badge-icon">⚡</span>
+            <span id="dacBadgeName" class="dac-badge-name">Audiocular Aura</span>
+          </div>
+          <div id="dacBadgeChipset" class="dac-badge-chipset">Savitech CB5100 + CS43131</div>
+          <div id="dacBadgeDesc" class="dac-badge-desc">Premium portable DAC featuring zero-latency hardware PEQ.</div>
+          
+          <div class="device-info-details">
+            <div class="info-item">
+              <span class="info-label">Firmware:</span>
+              <span id="infoFirmware" class="info-value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">DSP Sample Rate:</span>
+              <span id="infoSampleRate" class="info-value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">PEQ Slots Active:</span>
+              <span id="infoSlots" class="info-value">0 / 10</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">USB VID:</span>
+              <span id="infoVid" class="info-value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">USB PID:</span>
+              <span id="infoPid" class="info-value">-</span>
+            </div>
+          </div>
+          
+          <!-- Report Unknown Device Button -->
+          <div id="reportUnknownContainer" class="hidden" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; display: flex; justify-content: flex-end;">
+            <button id="btnReportUnknown" class="btn btn-secondary" style="font-size: 0.75rem; padding: 6px 12px; border-color: var(--color-danger); color: var(--color-danger);" aria-label="Report Unknown Device">📢 Report Unknown Device</button>
+          </div>
+        </div>
+
+        <!-- Custom USB Settings Accordion Form -->
+        <div class="custom-usb-accordion">
+          <button id="btnToggleCustomUsb" class="btn btn-secondary-text" aria-label="Toggle Custom USB Settings">Show Custom USB Options ▼</button>
+          <div id="customUsbConfig" class="accordion-content hidden">
+            <p class="accordion-description">If your DAC is not detected automatically, or if you are using another compatible DSP-enabled device (Savitech, Moondrop, Tanchjim, FiiO), enter its USB hex identifiers below to override connections:</p>
+            <div class="input-row" style="flex-wrap: wrap;">
+              <div class="input-field">
+                <label for="customVid">Vendor ID (Hex)</label>
+                <input type="text" id="customVid" placeholder="e.g. 262a" maxlength="6">
+              </div>
+              <div class="input-field">
+                <label for="customPid">Product ID (Hex)</label>
+                <input type="text" id="customPid" placeholder="e.g. 104b" maxlength="6">
+              </div>
+              <div class="input-field">
+                <label for="customProtocol">DSP Protocol</label>
+                <select id="customProtocol" class="premium-select">
+                  <option value="SAVITECH">SAVITECH</option>
+                  <option value="MOONDROP">MOONDROP</option>
+                  <option value="FIIO">FIIO</option>
+                  <option value="FIIO_JA11">FIIO (JA11)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Visualizer Graph Card -->
+      <section class="control-card visualizer-card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 class="card-title" data-i18n="visualizer_title">Real-Time PEQ Response Curve</h2>
+            <p class="card-subtitle" data-i18n="visualizer_subtitle">Drag the interactive handles to adjust frequency and gain in real-time.</p>
+          </div>
+          <div class="graph-actions button-group" style="display: flex; gap: 8px;">
+            <button id="btnUndo" class="btn btn-secondary btn-sm" disabled aria-label="Undo last action">
+              <span class="icon">↶</span> <span data-i18n="btn_undo">UNDO</span>
+            </button>
+            <button id="btnRedo" class="btn btn-secondary btn-sm" disabled aria-label="Redo last action">
+              <span class="icon">↷</span> <span data-i18n="btn_redo">REDO</span>
+            </button>
+            <button id="btnABCompare" class="btn btn-secondary btn-sm" aria-label="A/B Compare slots">
+              <span class="icon">⚖️</span> <span data-i18n="btn_compare">COMPARE:</span> <span id="abStateLabel">A</span>
+            </button>
+            <button id="btnShortcuts" class="btn btn-secondary btn-sm" aria-label="Show Keyboard Shortcuts">
+              <span class="icon">⌨️</span> <span data-i18n="btn_shortcuts">SHORTCUTS</span>
+            </button>
+          </div>
+        </div>
+        <div class="canvas-wrapper-full">
+          <canvas id="eqCanvas" class="peq-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- EQ Strips Card (Showing all 10 bands side-by-side) -->
+      <section class="control-card strips-card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+          <div>
+            <h2 class="card-title" data-i18n="bands_title">EQ Bands Controller</h2>
+            <p class="card-subtitle" data-i18n="bands_subtitle">Adjust parametric values for each of the 10 DSP bands.</p>
+          </div>
+          
+          <!-- Global Tone Tilt Sub-panel -->
+          <div class="tilt-control-panel">
+            <div class="tilt-header-row">
+              <span class="tilt-panel-title">Global Tone Tilt</span>
+              <span id="tiltTextValue" class="tilt-values-label">Bass: +0.0 dB, Treble: +0.0 dB</span>
+            </div>
+            <div class="tilt-sliders-row">
+              <div class="tilt-slider-group">
+                <label for="slideBassTilt" class="tilt-slider-label">Bass</label>
+                <input type="range" id="slideBassTilt" min="-6" max="6" step="0.1" value="0" class="tilt-slider" disabled>
+                <span id="lblBassTilt" class="tilt-value-badge">0.0 dB</span>
+              </div>
+              <div class="tilt-slider-group">
+                <label for="slideTrebleTilt" class="tilt-slider-label">Treble</label>
+                <input type="range" id="slideTrebleTilt" min="-6" max="6" step="0.1" value="0" class="tilt-slider" disabled>
+                <span id="lblTrebleTilt" class="tilt-value-badge">0.0 dB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="eqStrips" class="eq-strips-grid">
+          <!-- Rendered dynamically by fn.ts -->
+        </div>
+      </section>
+
+      <!-- Bottom Utilities Grid -->
+      <div class="bottom-grid">
+        <!-- Column Wrapper for Column 1 -->
+        <div class="bottom-col flex-col" style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Preset and Preset File Utilities Card -->
+          <section class="control-card utilities-card" style="margin-bottom: 0; flex: 1;">
+            <div class="card-header">
+              <h2 class="card-title" data-i18n="preset_utilities_title">Preset Utilities</h2>
+              <p class="card-subtitle" data-i18n="preset_utilities_subtitle">Import or export preset profiles.</p>
+            </div>
+            <div class="button-group flex-wrap">
+              <button id="btnReset" class="btn btn-secondary reset" disabled aria-label="Reset EQ to flat settings" data-i18n="btn_reset_defaults">RESET DEFAULTS</button>
+              <button id="btnResetFlat" class="btn btn-secondary reset" disabled aria-label="Reset all EQ bands to flat neutral values" data-i18n="btn_reset_flat">RESET TO FLAT</button>
+              <button id="btnImport" class="btn btn-secondary" aria-label="Import EQ Preset file" data-i18n="btn_import_preset">IMPORT PRESET</button>
+              <button id="btnExport" class="btn btn-secondary" disabled aria-label="Export EQ Preset as JSON file" data-i18n="btn_export_json">EXPORT JSON</button>
+              <button id="btnExportTxt" class="btn btn-secondary" disabled aria-label="Export EQ Preset as AutoEq parametric text file" data-i18n="btn_export_text">EXPORT TEXT</button>
+              <input type="file" id="fileInput" accept=".json,.txt" style="display: none;" aria-hidden="true">
+            </div>
+
+          </section>
+
+          <!-- My Custom Profiles Card -->
+          <section class="control-card custom-profiles-card" style="flex: 1;">
+            <div class="card-header">
+              <h2 class="card-title" data-i18n="custom_profiles_title">My Custom Profiles</h2>
+              <p class="card-subtitle" data-i18n="custom_profiles_subtitle">Save & load profiles from local memory.</p>
+            </div>
+            <div class="profile-save-wrapper" style="display: flex; gap: 10px; margin-bottom: 15px;">
+              <input type="text" id="customProfileName" class="premium-input" placeholder="Profile name..." style="flex: 1;" data-i18n-placeholder="input_profile_name_placeholder">
+              <button id="btnSaveProfile" class="btn btn-primary" aria-label="Save custom profile" data-i18n="btn_save_profile">SAVE</button>
+            </div>
+            <div id="customProfilesList" class="custom-profiles-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </section>
+        </div>
+
+        <!-- AutoEq Online Database Card -->
+        <section class="control-card autoeq-card">
+          <div class="card-header">
+            <h2 class="card-title" data-i18n="autoeq_title">AutoEq Online Database</h2>
+            <p class="card-subtitle" data-i18n="autoeq_subtitle">Search and apply settings for thousands of headphones & IEMs.</p>
+          </div>
+          <div class="autoeq-search-wrapper">
+            <div class="search-input-container">
+              <input type="text" id="autoeqSearch" class="premium-input" placeholder="Search headphone model... (e.g. Zero RED)" autocomplete="off" data-i18n-placeholder="input_search_placeholder">
+              <button id="btnRefreshAutoEq" class="btn btn-secondary-icon" title="Force refresh database index" aria-label="Refresh database">🔄</button>
+            </div>
+            <div id="autoeqSearchResults" class="search-dropdown hidden">
+              <!-- Results will be injected here -->
+            </div>
+          </div>
+
+          <!-- Pinned Favorites Section -->
+          <div class="favorites-section">
+            <h3 class="favorites-sub-title">⭐ Starred Presets</h3>
+            <div id="favoritePresetsList" class="favorites-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Hardware Flashing Control Panel -->
+        <section class="control-card sync-card">
+          <div class="card-header">
+            <h2 class="card-title" data-i18n="hardware_controls_title">Hardware Memory Controls</h2>
+            <p class="card-subtitle" data-i18n="hardware_controls_subtitle">Apply settings in real-time or flash them permanently.</p>
+          </div>
+          <div class="sync-actions">
+            <button id="btnSync" class="btn btn-accent action" disabled aria-label="Sync current EQ settings to DAC RAM" data-i18n="btn_sync_ram">SYNC TO RAM (APPLY)</button>
+            <button id="btnSendToDevice" class="btn btn-primary action" disabled aria-label="Send current EQ settings to device" data-i18n="btn_send_device">SEND TO DEVICE</button>
+            <button id="btnFlash" class="btn btn-highlight action" disabled aria-label="Write current EQ settings permanently to DAC Flash" data-i18n="btn_save_flash">SAVE TO FLASH (PERMANENT)</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Device Utility Controls Card -->
+      <section class="control-card utility-card-full">
+        <div class="card-header">
+          <h2 class="card-title" data-i18n="device_utilities_title">⚙️ Device Utility Controls</h2>
+          <p class="card-subtitle" data-i18n="device_utilities_subtitle">Configure advanced hardware-level DAC parameters, amplifier states, and microphone gain.</p>
+        </div>
+        
+        <div class="utility-grid">
+          <!-- Column 1: DAC Configuration -->
+          <div class="utility-col">
+            <h3 class="utility-sub-title" data-i18n="dac_configuration">DAC Configuration</h3>
+            
+            <!-- Filter Type -->
+            <div class="control-group">
+              <label for="selFilterType" class="control-label-row">
+                <span data-i18n="filter_type">Filter Type</span>
+                <span id="filterTypeVal" class="control-value">FAST-LL (Low Latency)</span>
+              </label>
+              <select id="selFilterType" class="premium-select" disabled>
+                <option value="FAST-LL" data-i18n="filter_fast_ll">FAST-LL (Low Latency)</option>
+                <option value="FAST-PC" data-i18n="filter_fast_pc">FAST-PC (Phase Comp)</option>
+                <option value="Slow-LL" data-i18n="filter_slow_ll">Slow-LL (Low Latency)</option>
+                <option value="Slow-PC" data-i18n="filter_slow_pc">Slow-PC (Phase Comp)</option>
+                <option value="NON-OS" data-i18n="filter_non_os">NON-OS (Non-Oversampling)</option>
+              </select>
+            </div>
+            
+            <!-- Filter Description -->
+            <div id="filterDescBox" class="filter-description-box">
+              <strong>FAST-LL (Low Latency):</strong> Minimizes pre-ringing (echo before notes) and provides the lowest latency. Warm, punchy, and thick sound. Best for gaming and videos.
+            </div>
+
+            <!-- Amp Mode -->
+            <div class="control-group-row">
+              <div class="toggle-details">
+                <span class="control-label" data-i18n="amp_mode">Amp Mode</span>
+                <span class="toggle-desc" data-i18n="amp_mode_desc">Class H vs Class AB</span>
+              </div>
+              <div class="toggle-wrapper">
+                <span class="toggle-label-left" id="ampLabelClassH" data-i18n="amp_class_h">Class H</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleAmpMode" disabled>
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label-right active" id="ampLabelClassAB" data-i18n="amp_class_ab">Class AB</span>
+              </div>
+            </div>
+
+            <!-- Gain Mode -->
+            <div class="control-group-row">
+              <div class="toggle-details">
+                <span class="control-label" data-i18n="gain_mode">Gain Mode</span>
+                <span class="toggle-desc" data-i18n="gain_mode_desc">Output Power Level</span>
+              </div>
+              <div class="toggle-wrapper">
+                <span class="toggle-label-left active" id="gainLabelLow" data-i18n="gain_low">Low</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleGainMode" disabled>
+                  <span class="slider"></span>
+                </label>
+                <span class="toggle-label-right" id="gainLabelHigh" data-i18n="gain_high">High</span>
+              </div>
+            </div>
+
+            <!-- Channel Balance -->
+            <div class="control-group">
+              <label for="sliderBalance" class="control-label-row">
+                <span data-i18n="channel_balance">Channel Balance</span>
+                <span id="balanceVal" class="control-value" data-i18n="balance_center_val">0 (Center)</span>
+              </label>
+              <input type="range" id="sliderBalance" min="-15" max="15" step="1" value="0" class="premium-range" disabled>
+              <div class="balance-labels">
+                <span data-i18n="balance_left">Left (-15)</span>
+                <span data-i18n="balance_center">Center (0)</span>
+                <span data-i18n="balance_right">Right (+15)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Microphone Control -->
+          <div class="utility-col">
+            <h3 class="utility-sub-title" data-i18n="mic_control">Microphone Control</h3>
+            
+            <!-- Monitoring Toggle -->
+            <div class="control-group-row">
+              <div class="toggle-details">
+                <span class="control-label" data-i18n="mic_monitor">Monitoring</span>
+                <span class="toggle-desc" data-i18n="mic_monitor_desc">Zero-Latency Mic Loopback</span>
+              </div>
+              <div class="toggle-wrapper">
+                <span class="toggle-label-left active" id="micMonitorStatus" data-i18n="monitoring_off">Monitoring Off</span>
+                <label class="switch">
+                  <input type="checkbox" id="toggleMicMonitor" disabled>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mic Visual Levels (Aesthetic Bars) -->
+            <div class="control-group">
+              <span class="control-label" data-i18n="input_levels">Input Levels</span>
+              <div class="level-meters">
+                <div class="meter-channel">
+                  <span class="meter-label">L</span>
+                  <div class="meter-bar-container">
+                    <div class="meter-bar" id="meterL"></div>
+                  </div>
+                </div>
+                <div class="meter-channel">
+                  <span class="meter-label">R</span>
+                  <div class="meter-bar-container">
+                    <div class="meter-bar" id="meterR"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mic Gain Slider -->
+            <div class="control-group">
+              <label for="sliderMicGain" class="control-label-row">
+                <span data-i18n="mic_gain">Microphone Gain</span>
+                <span id="micGainVal" class="control-value">0 dB</span>
+              </label>
+              <input type="range" id="sliderMicGain" min="-15" max="15" step="1" value="0" class="premium-range" disabled>
+              <div class="balance-labels">
+                <span>-15 dB</span>
+                <span>0 dB</span>
+                <span>+15 dB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility Bottom Actions -->
+        <div class="utility-footer">
+          <button id="btnFactoryReset" class="btn btn-secondary reset" disabled><span class="icon">🔄</span> <span data-i18n="btn_factory_reset">FULL FACTORY RESET</span></button>
+          <button id="btnRefreshDb" class="btn btn-secondary" aria-label="Refresh remote device database"><span class="icon">🔄</span> <span data-i18n="btn_refresh_db">REFRESH DATABASE</span></button>
+          <button id="btnGetFw" class="btn btn-accent action" disabled><span class="icon">⚡</span> <span data-i18n="btn_get_fw">GET FW VERSION</span></button>
+        </div>
+      </section>
+
+      <!-- Collapsible Console/Terminal Log Panel -->
+      <section class="control-card log-card">
+        <div class="log-header">
+          <h3 class="log-title" data-i18n="console_title">System Messages Console</h3>
+          <div class="log-header-buttons" style="display: flex; gap: 8px;">
+            <button id="btnCopyLog" class="btn btn-clear-log" aria-label="Copy Log Console to Clipboard" data-i18n="btn_copy_log">Copy</button>
+            <button class="btn btn-clear-log" onclick="document.getElementById('logConsole').innerHTML = '<div>' + (window.t ? window.t('log_console_cleared') : 'Console cleared.') + '</div>'" aria-label="Clear Log Console" data-i18n="btn_clear_log">Clear</button>
+          </div>
+        </div>
+        <div id="logConsole" class="log-body">Ready to connect...</div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2026 AuraPEQ. Designed for the Audiocular Aura (CS43131 / SGM8262 / CB5100 chipset). Powered by WebHID.</p>
+    </footer>
+
+  </div>
+
+  <!-- Supported DACs Modal Dialog -->
+  <div id="modalSupportedDacs" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">📋 Supported Hardware DSP DACs</h3>
+        <button id="btnCloseModal" class="btn-close-modal" aria-label="Close supported DACs list">✖</button>
+      </div>
+      <p class="modal-desc">The following hardware DSP audio controllers have been identified as compatible with WebHID PEQ configuration:</p>
+      <div id="supportedDacsList" class="supported-dacs-list-modal">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Unknown Device Modal Dialog -->
+  <div id="modalReportDevice" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">📢 Report Unknown Device</h3>
+        <button id="btnCloseReportModal" class="btn-close-modal" aria-label="Close report dialog">✖</button>
+      </div>
+      <p class="modal-desc">Thank you for helping us add support for more devices! Confirm the details below to generate a report:</p>
+      
+      <div class="report-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+        <div class="input-field">
+          <label for="reportProductName">Device Name</label>
+          <input type="text" id="reportProductName" class="premium-input" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff;" readonly>
+        </div>
+        <div class="input-row" style="display: flex; gap: 16px;">
+          <div class="input-field" style="flex: 1;">
+            <label for="reportVid">Vendor ID (Hex)</label>
+            <input type="text" id="reportVid" class="premium-input font-mono" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff;" readonly>
+          </div>
+          <div class="input-field" style="flex: 1;">
+            <label for="reportPid">Product ID (Hex)</label>
+            <input type="text" id="reportPid" class="premium-input font-mono" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff;" readonly>
+          </div>
+        </div>
+        <div class="input-field">
+          <label for="reportProtocol">Successful Protocol</label>
+          <select id="reportProtocol" class="premium-select">
+            <option value="SAVITECH">SAVITECH (Aura, DS2, DC04 Pro, Generic)</option>
+            <option value="MOONDROP">MOONDROP (Dawn Pro 2, Dawn Pro, FreeDSP, May)</option>
+            <option value="FIIO">FIIO (KA17, KA15, KB1)</option>
+            <option value="FIIO_JA11">FIIO_JA11 (JadeAudio JA11)</option>
+          </select>
+        </div>
+        
+        <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+          <button id="btnSubmitReport" class="btn btn-primary" aria-label="Copy Report and Open GitHub">Generate Report & Open GitHub</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal Dialog -->
+  <div id="modalShortcuts" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="modal_shortcuts_title">⌨️ Keyboard Shortcuts</h3>
+        <button id="btnCloseShortcutsModal" class="btn-close-modal" aria-label="Close shortcuts list">✖</button>
+      </div>
+      <p class="modal-desc" data-i18n="modal_shortcuts_desc">Use the following keyboard shortcuts to control AuraPEQ without a mouse:</p>
+      
+      <table class="shortcuts-table">
+        <thead>
+          <tr>
+            <th data-i18n="shortcut_header_action">Action</th>
+            <th data-i18n="shortcut_header_key">Shortcut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n="shortcut_undo">Undo Last Adjustment</td>
+            <td><kbd>Ctrl</kbd> + <kbd>Z</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>Z</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_redo">Redo Last Adjustment</td>
+            <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> <span class="kbd-or">/</span> <kbd>Ctrl</kbd> + <kbd>Y</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_ab">A/B Compare Toggle</td>
+            <td><kbd>Ctrl</kbd> + <kbd>B</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>B</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_reset_selected">Reset Focused Band</td>
+            <td><kbd>R</kbd> <span class="shortcut-tip">(when band is focused)</span></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_reset_all">Reset All Bands to Default</td>
+            <td><kbd>Shift</kbd> + <kbd>R</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_sync">Sync settings to RAM</td>
+            <td><kbd>Ctrl</kbd> + <kbd>S</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>S</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_flash">Save settings to Flash</td>
+            <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_prev_preset">Load Previous Custom Profile</td>
+            <td><kbd>Ctrl</kbd> + <kbd>[</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>[</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_next_preset">Load Next Custom Profile</td>
+            <td><kbd>Ctrl</kbd> + <kbd>]</kbd> <span class="kbd-or">or</span> <kbd>⌘</kbd> + <kbd>]</kbd></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_toggle_band">Toggle Focused Band Enable</td>
+            <td><kbd>E</kbd> <span class="shortcut-tip">(when band is focused)</span></td>
+          </tr>
+          <tr>
+            <td data-i18n="shortcut_close">Close Modal</td>
+            <td><kbd>Esc</kbd></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Ear Protection Safety Warning Modal Dialog -->
+  <div id="modalSafetyWarning" class="modal-overlay hidden">
+    <div class="modal-content safety-warning-content">
+      <div class="modal-header">
+        <h3 class="modal-title warning-title">⚠️ Ear Protection Warning</h3>
+        <button id="btnCloseSafetyModal" class="btn-close-modal" aria-label="Close safety warning">✖</button>
+      </div>
+      <p class="modal-desc safety-desc">
+        Your current EQ configuration exceeds safe listening thresholds. Syncing this profile to your DAC may cause permanent hearing damage or sudden loud pops.
+      </p>
+      <div class="safety-reasons-box">
+        <ul id="safetyWarningReasons">
+          <!-- Reasons will be injected dynamically -->
+        </ul>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+        <button id="btnSafetyCancel" class="btn btn-secondary">Cancel</button>
+        <button id="btnSafetyProceed" class="btn btn-danger">Proceed Anyway</button>
+        <button id="btnSafetyAutoReduce" class="btn btn-accent">Auto Reduce</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script initialization -->
+  
+  
+  <!-- WebHID Support Verification Script -->
+  <script>
+    if (!navigator.hid) {
+      document.getElementById('hidSupportAlert').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
