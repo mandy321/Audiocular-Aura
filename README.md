@@ -25,6 +25,10 @@ If you are new to audio tuning, here is what this tool does and why it is specia
 
 ## ✨ Features
 
+* **EQ Undo/Redo History Stack**: Full undo/redo functionality (up to 50 snapshots depth) to revert or re-apply any adjustments (slider drags, visualizer graph edits, presets, resets). Reverting or re-applying steps updates the UI and automatically syncs to the connected hardware.
+* **A/B Comparison Toggling**: Toggle between slot A (your active custom profile) and slot B (initialized to a flat neutral baseline reference on first compare click). Updates both visualizer canvas and hardware values instantly.
+* **Multi-lingual Translation Framework (i18n)**: High-performance vanilla i18n translation system supporting English (`en`), Spanish (`es`), German (`de`), and Simplified Chinese (`zh`). Dynamic translations cover all static labels, alerts, placeholders, aria-labels, titles, and system message logs, persisting on page reload.
+* **Global Keyboard Shortcuts & Help Modal**: Control key mappings mapped dynamically for Windows/Mac (Ctrl/Cmd) including Z (Undo), Shift+Z/Y (Redo), B (A/B Compare), S (Sync to RAM), Shift+S (Save to Flash), `[`/`]` (Prev/Next Custom Profile), R (Reset focused band), Shift+R (Reset all), E (Toggle focused band bypass), and Escape (Close modals), paired with a visual shortcuts helper overlay modal.
 * **Hardware-Level DSP Processing**: The audio filter logic is processed directly inside the DAC's integrated DSP chip.
 * **Verified Peaking & Shelving Filter Math**: Exact implementation of RBJ Audio EQ cookbook formulas for Peaking (`PK`), Low-Shelf (`LSQ`), and High-Shelf (`HSQ`) filters calculated and sent directly to the device.
 * **Instant Real-Time Sync**: No manual syncing required! Band parameters (Frequency, Q, Gain, Type, Enable state) are throttled (50ms window) and sent instantly to the DAC as you drag canvas handles, update select dropdowns, or adjust sliders.
