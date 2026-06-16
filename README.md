@@ -4,7 +4,6 @@
 
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=flat-square)](LICENSE)
 [![Live App](https://img.shields.io/badge/Live%20App-Launch-brightgreen?style=flat-square)](https://mandy321.github.io/Audiocular-Aura/)
-[![Sponsor](https://img.shields.io/badge/Sponsor-Heart-ff69b4?style=flat-square&logo=github-sponsors)](https://github.com/sponsors/YOUR_USERNAME)
 [![Tech Stack](https://img.shields.io/badge/Stack-TypeScript%20%7C%20CSS-blueviolet?style=flat-square)](#-tech-stack)
 
 ---
@@ -93,16 +92,6 @@ If you are looking for resources on equalizers or DAC configuration, this projec
 
 ---
 
-## 💖 Support & Donations
-
-If AuraPEQ has helped you tune your DAC or headphones, please consider supporting the project! Your donations help maintain compatibility updates for new DAC models, support active development, and keep the project open-source.
-
-*   **GitHub Sponsors (0% platform fees)**: [Sponsor on GitHub](https://github.com/sponsors/YOUR_USERNAME)
-*   **Ko-fi (0% fee, supports PayPal/Card)**: [Support on Ko-fi](https://ko-fi.com/YOUR_USERNAME)
-*   **Buy Me a Coffee**: [Support on Buy Me a Coffee](https://buymeacoffee.com/YOUR_USERNAME)
-*   **UPI (India)**: Scan or pay directly to the UPI ID: `mtewatia67-1@okaxis`.
-
----
 
 ## 🛡️ License
 

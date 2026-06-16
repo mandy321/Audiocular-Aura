@@ -961,83 +961,11 @@ body.aura-app-theme {
 /* --- Footer System --- */
 .app-footer {
   text-align: center;
-  padding: 24px 0;
+  padding: 16px 0;
   border-top: 1px solid var(--border-color);
   color: var(--text-dim);
   font-size: 0.75rem;
   font-weight: 400;
-}
-
-.footer-sponsor-container {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.footer-sponsor-container span {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-.sponsor-buttons {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.sponsor-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-decoration: none;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.sponsor-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-.sponsor-btn.github:hover {
-  background: rgba(255, 105, 180, 0.1);
-  border-color: rgba(255, 105, 180, 0.4);
-  color: #ff69b4;
-}
-
-.sponsor-btn.kofi:hover {
-  background: rgba(255, 95, 95, 0.1);
-  border-color: rgba(255, 95, 95, 0.4);
-  color: #ff5f5f;
-}
-
-.sponsor-btn.bmc:hover {
-  background: rgba(255, 221, 0, 0.08);
-  border-color: rgba(255, 221, 0, 0.4);
-  color: #ffdd00;
-}
-
-.sponsor-btn.upi:hover {
-  background: rgba(0, 180, 216, 0.1);
-  border-color: rgba(0, 180, 216, 0.4);
-  color: #00b4d8;
-}
-
-.sponsor-icon {
-  font-size: 0.85rem;
 }
 
 /* --- Keyframe Animations --- */
