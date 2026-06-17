@@ -174,6 +174,9 @@ export function initState() {
  */
 export function setGlobalGain(gain: number) {
 	globalGainState = gain;
+	if (device) {
+		localStorage.setItem(`last_preamp_gain_${device.vendorId}_${device.productId}`, gain.toString());
+	}
 	updateGlobalGainUI(gain);
 }
 
@@ -237,10 +240,9 @@ export async function undo() {
 
 	const previous = undoStack[undoStack.length - 1];
 	eqState = JSON.parse(JSON.stringify(previous.eqState)) as EQ;
-	globalGainState = previous.globalGainState;
+	setGlobalGain(previous.globalGainState);
 
 	renderUI(eqState);
-	updateGlobalGainUI(globalGainState);
 	
 	if (device) {
 		await syncToDevice();
@@ -255,10 +257,9 @@ export async function redo() {
 	undoStack.push(next);
 
 	eqState = JSON.parse(JSON.stringify(next.eqState)) as EQ;
-	globalGainState = next.globalGainState;
+	setGlobalGain(next.globalGainState);
 
 	renderUI(eqState);
-	updateGlobalGainUI(globalGainState);
 
 	if (device) {
 		await syncToDevice();
@@ -334,7 +335,7 @@ export async function toggleABCompare() {
 	}
 
 	renderUI(eqState);
-	updateGlobalGainUI(globalGainState);
+	setGlobalGain(globalGainState);
 
 	if (device) {
 		await syncToDevice();
@@ -431,6 +432,9 @@ export function getGlobalGainState() {
 
 export function setGlobalGainState(gainState: number) {
 	globalGainState = gainState;
+	if (device) {
+		localStorage.setItem(`last_preamp_gain_${device.vendorId}_${device.productId}`, gainState.toString());
+	}
 }
 
 /**
@@ -604,6 +608,7 @@ export async function connectToDevice() {
 
 		const dev = devices[0];
 		device = dev;
+		(window as any).device = dev;
 		await dev.open();
 
 		// Log connection VID/PID immediately
@@ -688,6 +693,7 @@ export async function disconnectDevice() {
 		log(`Disconnecting from: ${device.productName || "DAC"}`);
 		await device.close();
 		device = null;
+		(window as any).device = null;
 		
 		adjustBandsForDevice(null);
 
@@ -850,6 +856,7 @@ export async function autoConnectDevice() {
 
 		const dev = devices[0];
 		device = dev;
+		(window as any).device = dev;
 		await dev.open();
 
 		// Log connection VID/PID immediately
@@ -1306,7 +1313,7 @@ export function calculateCombinedPeakGain(): number {
 	return maxGain;
 }
 
-export async function recalculateAutoPreamp() {
+export async function recalculateAutoPreamp(skipWrite = false) {
 	if (!autoPreampEnabled) return;
 	const protocol = getActiveProtocol();
 	let peak = calculateCombinedPeakGain();
@@ -1324,10 +1331,10 @@ export async function recalculateAutoPreamp() {
 	targetPreamp = Math.max(-20, Math.min(0, targetPreamp));
 
 	globalGainState = targetPreamp;
-	await updateGlobalGain(globalGainState);
+	await updateGlobalGain(globalGainState, skipWrite);
 }
 
-export async function toggleAutoPreamp(enabled: boolean) {
+export async function toggleAutoPreamp(enabled: boolean, skipWrite = false) {
 	autoPreampEnabled = enabled;
 	localStorage.setItem("aura_auto_preamp_enabled", enabled ? "true" : "false");
 	if (autoPreampEnabled) {
@@ -1335,7 +1342,7 @@ export async function toggleAutoPreamp(enabled: boolean) {
 		localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
 		const globalGainSlider = document.getElementById("globalGainSlider") as HTMLInputElement;
 		if (globalGainSlider) globalGainSlider.disabled = true;
-		await recalculateAutoPreamp();
+		await recalculateAutoPreamp(skipWrite);
 	} else {
 		const globalGainSlider = document.getElementById("globalGainSlider") as HTMLInputElement;
 		if (globalGainSlider && device) {
@@ -1343,7 +1350,7 @@ export async function toggleAutoPreamp(enabled: boolean) {
 		}
 		globalGainState = manualPreampState;
 		localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
-		await updateGlobalGain(globalGainState);
+		await updateGlobalGain(globalGainState, skipWrite);
 	}
 }
 
@@ -1353,6 +1360,7 @@ export async function toggleAutoPreamp(enabled: boolean) {
 (window as any).setManualPreampState = setManualPreampState;
 (window as any).recalculateAutoPreamp = recalculateAutoPreamp;
 (window as any).toggleAutoPreamp = toggleAutoPreamp;
+(window as any).setGlobalGainState = setGlobalGainState;
 (window as any).getBassTiltState = getBassTiltState;
 (window as any).setBassTiltState = setBassTiltState;
 (window as any).getTrebleTiltState = getTrebleTiltState;

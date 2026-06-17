@@ -243,7 +243,7 @@ if (checkAutoPreamp) {
 	const autoPreampSaved = localStorage.getItem("aura_auto_preamp_enabled") === "true";
 	checkAutoPreamp.checked = autoPreampSaved;
 	setTimeout(() => {
-		(window as any).toggleAutoPreamp?.(autoPreampSaved);
+		(window as any).toggleAutoPreamp?.(autoPreampSaved, true);
 	}, 100);
 	checkAutoPreamp.addEventListener("change", async () => {
 		const enabled = checkAutoPreamp.checked;

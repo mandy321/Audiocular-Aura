@@ -82,9 +82,21 @@ export function updateGlobalGainUI(val: number) {
  * Update global gain and send to device
  * @param newGlobalGainState The new global gain value
  */
-export async function updateGlobalGain(newGlobalGainState: number) {
+export async function updateGlobalGain(newGlobalGainState: number, skipWrite = false) {
 	updateGlobalGainUI(newGlobalGainState);
-	await setDeviceGlobalGain(newGlobalGainState);
+	
+	const dev = (window as any).device;
+	if (dev) {
+		localStorage.setItem(`last_preamp_gain_${dev.vendorId}_${dev.productId}`, newGlobalGainState.toString());
+	}
+
+	if (skipWrite) {
+		if (typeof (window as any).setGlobalGainState === "function") {
+			(window as any).setGlobalGainState(newGlobalGainState);
+		}
+	} else {
+		await setDeviceGlobalGain(newGlobalGainState);
+	}
 }
 
 /**

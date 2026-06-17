@@ -318,7 +318,13 @@ export async function readDeviceParams(device: HIDDevice) {
 		return;
 	} else if (protocol === "MOONDROP") {
 		try {
-			const { preamp, bands } = await readMoondropParams(device);
+			let { preamp, bands } = await readMoondropParams(device);
+			if (preamp === 0 && device) {
+				const savedVal = localStorage.getItem(`last_preamp_gain_${device.vendorId}_${device.productId}`);
+				if (savedVal !== null) {
+					preamp = Number(savedVal);
+				}
+			}
 			setGlobalGain(preamp);
 			setEqState(bands);
 			renderUI(bands);
@@ -436,7 +442,13 @@ export function setupListener(device: HIDDevice) {
 			if (cmd === 23) {
 				const raw = (data[7] << 8) | data[6];
 				const signed = raw > 32767 ? raw - 65536 : raw;
-				const gain = Number.parseFloat((signed / 2560).toFixed(1));
+				let gain = Number.parseFloat((signed / 2560).toFixed(1));
+				if (gain === 0 && device) {
+					const savedVal = localStorage.getItem(`last_preamp_gain_${device.vendorId}_${device.productId}`);
+					if (savedVal !== null) {
+						gain = Number(savedVal);
+					}
+				}
 				setGlobalGain(gain);
 			} else if (cmd === 21) {
 				const idx = data[6];
@@ -478,7 +490,13 @@ export function setupListener(device: HIDDevice) {
 			const infoFirmware = document.getElementById("infoFirmware");
 			if (infoFirmware) infoFirmware.innerText = ver;
 		} else if (cmd === CMD_SAVI.GAIN) {
-			const gain = new Int8Array([data[4]])[0];
+			let gain = new Int8Array([data[4]])[0];
+			if (gain === 0 && device) {
+				const savedVal = localStorage.getItem(`last_preamp_gain_${device.vendorId}_${device.productId}`);
+				if (savedVal !== null) {
+					gain = Number(savedVal);
+				}
+			}
 			setGlobalGain(gain);
 		} else if (cmd === 17) { // Filter
 			const val = data[3];
