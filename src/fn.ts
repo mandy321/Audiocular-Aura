@@ -174,6 +174,10 @@ export function initState() {
  */
 export function setGlobalGain(gain: number) {
 	globalGainState = gain;
+	if (!autoPreampEnabled) {
+		manualPreampState = gain;
+		localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
+	}
 	if (device) {
 		localStorage.setItem(`last_preamp_gain_${device.vendorId}_${device.productId}`, gain.toString());
 	}
@@ -432,6 +436,10 @@ export function getGlobalGainState() {
 
 export function setGlobalGainState(gainState: number) {
 	globalGainState = gainState;
+	if (!autoPreampEnabled) {
+		manualPreampState = gainState;
+		localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
+	}
 	if (device) {
 		localStorage.setItem(`last_preamp_gain_${device.vendorId}_${device.productId}`, gainState.toString());
 	}
@@ -1146,7 +1154,10 @@ export function setTrebleTiltState(val: number) { trebleTiltState = val; }
 export function getAutoPreampEnabled() { return autoPreampEnabled; }
 export function setAutoPreampEnabled(val: boolean) { autoPreampEnabled = val; }
 export function getManualPreampState() { return manualPreampState; }
-export function setManualPreampState(val: number) { manualPreampState = val; }
+export function setManualPreampState(val: number) {
+	manualPreampState = val;
+	localStorage.setItem("aura_active_manual_preamp", manualPreampState.toString());
+}
 
 function getBiquadGainAtFreq(
 	type: string,
