@@ -731,9 +731,6 @@ export async function writeBand(
 	protocol: string,
 ) {
 	let val = (band.enabled ? band.gain : 0) + getTiltGainAtFreq(band.freq);
-	if (protocol === "SAVITECH") {
-		val = Math.round(val);
-	}
 	const effectiveGain = Math.max(-12, Math.min(12, val));
 
 	if (protocol === "FIIO") {

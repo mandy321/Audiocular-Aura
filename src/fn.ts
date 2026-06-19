@@ -553,10 +553,10 @@ export function renderUI(eqState: EQ) {
 
 					<div class="slider-container">
 						<span class="slider-label">${t("band_gain") || "Gain (dB)"}</span>
-						<input type="range" orient="vertical" min="-12" max="12" step="0.5" value="${band.gain}" 
+						<input type="range" orient="vertical" min="-12" max="12" step="0.1" value="${band.gain}" 
 							oninput="window.updateState(${i}, 'gain', this.value)" onchange="window.pushHistory()" ${device ? "" : "disabled"} class="vertical-slider">
 						<div class="gain-input-wrapper">
-							<input type="number" value="${band.gain}" step="0.5" min="-12" max="12"
+							<input type="number" value="${band.gain}" step="0.1" min="-12" max="12"
 								onchange="window.updateState(${i}, 'gain', this.value); window.pushHistory()" id="num-gain-${i}" ${device ? "" : "disabled"} class="strip-input font-mono" size="6">
 						</div>
 					</div>

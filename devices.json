@@ -1,6 +1,14 @@
 [
   {
     "vid": 13058,
+    "pid": 17384,
+    "name": "TRN Black Pearl",
+    "chipset": "Savitech CB5100 + CS43131",
+    "protocol": "SAVITECH",
+    "description": "Portable USB DAC featuring dual CS43131 and Savitech CB5100 PEQ."
+  },
+  {
+    "vid": 13058,
     "name": "Audiocular Aura",
     "chipset": "Savitech CB5100 + CS43131",
     "protocol": "SAVITECH",

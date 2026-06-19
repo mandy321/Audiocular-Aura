@@ -14,6 +14,7 @@ export const VID_SAVITECH_OFFICIAL = 0x262a;  // Fosi, iBasso
 export const VID_COMTRUE = 0x2fc6;            // Moondrop, Tanchjim (Comtrue CT7601)
 export const VID_FIIO = 0x2972;               // FiiO (JA11, KA17, etc.)
 export const VID_AUDIOCULAR = 0x3302;         // TTGK Technology / Audiocular Aura
+export const PID_TRN_BLACK_PEARL = 0x43e8;    // TRN Black Pearl PID
 
 // --- WALKPLAY (SAVITECH) COMMANDS ---
 export const CMD_SAVI = {
@@ -78,6 +79,14 @@ export interface IdentifiedDac {
 }
 
 export const KNOWN_DACS: IdentifiedDac[] = [
+	{
+		vid: VID_AUDIOCULAR,
+		pid: PID_TRN_BLACK_PEARL,
+		name: "TRN Black Pearl",
+		chipset: "Savitech CB5100 + CS43131",
+		protocol: "SAVITECH",
+		description: "Portable USB DAC featuring dual CS43131 and Savitech CB5100 PEQ.",
+	},
 	{
 		vid: VID_AUDIOCULAR,
 		name: "Audiocular Aura",
