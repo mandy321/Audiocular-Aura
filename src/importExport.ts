@@ -37,10 +37,8 @@ function neutralBand(index: number): Band {
  * Export profile to JSON file
  */
 export async function exportProfile() {
-	const device = getDevice();
 	const globalGainState = getGlobalGainState();
 	const eqState = getEqState();
-	if (!device) return;
 	
 	const data = {
 		device: "Audiocular Aura",
@@ -64,10 +62,8 @@ export async function exportProfile() {
  * Format: Preamp: X dB / Filter N: ON/OFF PK|LSQ|HSQ Fc XXXX Hz Gain X.X dB Q X.XX
  */
 export async function exportProfileAsText() {
-	const device = getDevice();
 	const globalGainState = getGlobalGainState();
 	const eqState = getEqState();
-	if (!device) return;
 
 	// Map internal type names to AutoEq standard names
 	const typeMap: Record<string, string> = {

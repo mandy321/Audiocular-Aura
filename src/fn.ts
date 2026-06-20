@@ -125,7 +125,8 @@ export function identifyConnectedDac(dev: HIDDevice) {
 	const isMoondrop = dev.vendorId === VID_COMTRUE;
 	const isJa11 = dev.vendorId === VID_FIIO && dev.productId === 258;
 	const isSavitech = dev.vendorId === VID_SAVITECH || dev.vendorId === VID_SAVITECH_ALT || dev.vendorId === VID_SAVITECH_OFFICIAL || dev.vendorId === VID_AUDIOCULAR;
-	const sampleRateStr = (isSavitech || isMoondrop || isJa11) ? "96 kHz" : "48 kHz";
+	const isFiio10Band = dev.vendorId === VID_FIIO && dev.productId !== 258;
+	const sampleRateStr = (isSavitech || isMoondrop || isJa11 || isFiio10Band) ? "96 kHz" : "48 kHz";
 	
 	const infoSampleRate = document.getElementById("infoSampleRate");
 	if (infoSampleRate) infoSampleRate.innerText = sampleRateStr;

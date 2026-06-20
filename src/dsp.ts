@@ -848,12 +848,12 @@ async function writeBandFiio(device: HIDDevice, band: Band, gain: number) {
 
 	let t = gain * 10;
 	if (t < 0) t = (Math.abs(t) ^ 65535) + 1;
-	const gainLow = (t >> 8) & 0xff;
-	const gainHigh = t & 0xff;
+	const gainHigh = (t >> 8) & 0xff;
+	const gainLow = t & 0xff;
 
 	const qVal = Math.round(band.q * 100);
-	const qLow = (qVal >> 8) & 0xff;
-	const qHigh = qVal & 0xff;
+	const qHigh = (qVal >> 8) & 0xff;
+	const qLow = qVal & 0xff;
 
 	const packet = new Uint8Array([
 		CMD_FIIO.HEADER_SET_1,
@@ -863,12 +863,12 @@ async function writeBandFiio(device: HIDDevice, band: Band, gain: number) {
 		CMD_FIIO.FILTER_PARAMS,
 		8,
 		band.index,
-		gainLow,
 		gainHigh,
+		gainLow,
 		freqHigh,
 		freqLow,
-		qLow,
 		qHigh,
+		qLow,
 		typeMap[band.type as keyof typeof typeMap] || 0,
 		0,
 		CMD_FIIO.END,
