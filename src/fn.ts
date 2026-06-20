@@ -359,48 +359,72 @@ export function initSlots() {
 	updateSlotLabel();
 }
 
-export async function toggleABCompare() {
+export async function setABCompareState(state: "Off" | "A" | "B") {
 	const current = {
 		eqState: JSON.parse(JSON.stringify(eqState)) as EQ,
 		globalGainState: globalGainState
 	};
 
-	// 3-state cycle: Off -> B -> A -> Off
-	if (!slotA && !slotB) {
-		// Off -> Slot B active
-		slotA = {
-			eqState: JSON.parse(JSON.stringify(current.eqState)) as EQ,
-			globalGainState: current.globalGainState,
-			eqName: lastAppliedEqName
-		};
-		slotB = {
-			eqState: defaultEqState(),
-			globalGainState: 0,
-			eqName: t("flat_profile_default") || "Flat Profile (Default)"
-		};
-		activeSlot = "B";
-		
-		eqState = JSON.parse(JSON.stringify(slotB.eqState)) as EQ;
-		globalGainState = slotB.globalGainState;
-		lastAppliedEqName = slotB.eqName;
-	} else if (activeSlot === "B") {
-		// Slot B active -> Slot A active
-		slotB = {
-			eqState: current.eqState,
-			globalGainState: current.globalGainState,
-			eqName: lastAppliedEqName
-		};
-		activeSlot = "A";
-		
-		eqState = JSON.parse(JSON.stringify(slotA!.eqState)) as EQ;
-		globalGainState = slotA!.globalGainState;
-		lastAppliedEqName = slotA!.eqName;
-	} else {
-		// Slot A active -> Off
+	if (state === "Off") {
+		if (!slotA && !slotB) return; // Already off
 		slotA = null;
 		slotB = null;
 		activeSlot = "A";
-		// eqState and globalGainState remain at Slot A's current values
+	} else if (state === "A") {
+		if (slotA && slotB && activeSlot === "A") return;
+
+		if (!slotA && !slotB) {
+			slotA = {
+				eqState: JSON.parse(JSON.stringify(current.eqState)) as EQ,
+				globalGainState: current.globalGainState,
+				eqName: lastAppliedEqName
+			};
+			slotB = {
+				eqState: defaultEqState(),
+				globalGainState: 0,
+				eqName: t("flat_profile_default") || "Flat Profile (Default)"
+			};
+			activeSlot = "A";
+		} else {
+			slotB = {
+				eqState: current.eqState,
+				globalGainState: current.globalGainState,
+				eqName: lastAppliedEqName
+			};
+			activeSlot = "A";
+			eqState = JSON.parse(JSON.stringify(slotA!.eqState)) as EQ;
+			globalGainState = slotA!.globalGainState;
+			lastAppliedEqName = slotA!.eqName;
+		}
+	} else if (state === "B") {
+		if (slotA && slotB && activeSlot === "B") return;
+
+		if (!slotA && !slotB) {
+			slotA = {
+				eqState: JSON.parse(JSON.stringify(current.eqState)) as EQ,
+				globalGainState: current.globalGainState,
+				eqName: lastAppliedEqName
+			};
+			slotB = {
+				eqState: defaultEqState(),
+				globalGainState: 0,
+				eqName: t("flat_profile_default") || "Flat Profile (Default)"
+			};
+			activeSlot = "B";
+			eqState = JSON.parse(JSON.stringify(slotB.eqState)) as EQ;
+			globalGainState = slotB.globalGainState;
+			lastAppliedEqName = slotB.eqName;
+		} else {
+			slotA = {
+				eqState: current.eqState,
+				globalGainState: current.globalGainState,
+				eqName: lastAppliedEqName
+			};
+			activeSlot = "B";
+			eqState = JSON.parse(JSON.stringify(slotB!.eqState)) as EQ;
+			globalGainState = slotB!.globalGainState;
+			lastAppliedEqName = slotB!.eqName;
+		}
 	}
 
 	renderUI(eqState);
@@ -412,25 +436,41 @@ export async function toggleABCompare() {
 	updateSlotLabel();
 }
 
-function updateSlotLabel() {
-	const abStateLabel = document.getElementById("abStateLabel");
-	if (abStateLabel) {
-		if (slotA && slotB) {
-			abStateLabel.innerText = activeSlot;
-		} else {
-			abStateLabel.innerText = "Off";
-		}
+export async function toggleABCompare() {
+	// Cycle: Off -> B -> A -> Off
+	if (!slotA && !slotB) {
+		await setABCompareState("B");
+	} else if (activeSlot === "B") {
+		await setABCompareState("A");
+	} else {
+		await setABCompareState("Off");
 	}
-	const btnABCompare = document.getElementById("btnABCompare");
-	if (btnABCompare) {
+}
+
+function updateSlotLabel() {
+	const btnOff = document.getElementById("btnCompareOff");
+	const btnA = document.getElementById("btnCompareA");
+	const btnB = document.getElementById("btnCompareB");
+
+	if (btnOff && btnA && btnB) {
+		btnOff.classList.remove("active-off");
+		btnA.classList.remove("active");
+		btnB.classList.remove("active");
+
 		if (slotA && slotB) {
-			btnABCompare.classList.add("active");
+			if (activeSlot === "A") {
+				btnA.classList.add("active");
+			} else {
+				btnB.classList.add("active");
+			}
 		} else {
-			btnABCompare.classList.remove("active");
+			btnOff.classList.add("active-off");
 		}
 	}
 	updateLastAppliedEqUI();
 }
+
+(window as any).setABCompareState = setABCompareState;
 
 export function getFocusedBandIndex() {
 	return focusedBandIndex;

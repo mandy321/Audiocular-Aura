@@ -2320,5 +2320,48 @@ kbd {
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
 
+/* Segmented Compare Control Group */
+.compare-group {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.5); /* Slate 900 tint */
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 4px;
+}
+
+.compare-group .btn-segment {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.compare-group .btn-segment:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.compare-group .btn-segment.active {
+  background: var(--color-accent); /* Neon pink/magenta */
+  color: #ffffff;
+  box-shadow: 0 2px 8px 0 rgba(236, 72, 153, 0.4);
+}
+
+.compare-group .btn-segment.active-off {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  box-shadow: none;
+}
+
 
 

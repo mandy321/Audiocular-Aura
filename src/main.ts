@@ -22,6 +22,7 @@ import {
 	undo,
 	redo,
 	toggleABCompare,
+	setABCompareState,
 	initHistory,
 	initSlots,
 	loadNextProfile,
@@ -1160,11 +1161,15 @@ btnSubmitReport?.addEventListener("click", async () => {
  */
 const btnUndo = document.getElementById("btnUndo");
 const btnRedo = document.getElementById("btnRedo");
-const btnABCompare = document.getElementById("btnABCompare");
+const btnCompareOff = document.getElementById("btnCompareOff");
+const btnCompareA = document.getElementById("btnCompareA");
+const btnCompareB = document.getElementById("btnCompareB");
 
 btnUndo?.addEventListener("click", () => undo());
 btnRedo?.addEventListener("click", () => redo());
-btnABCompare?.addEventListener("click", () => toggleABCompare());
+btnCompareOff?.addEventListener("click", () => setABCompareState("Off"));
+btnCompareA?.addEventListener("click", () => setABCompareState("A"));
+btnCompareB?.addEventListener("click", () => setABCompareState("B"));
 
 /**
  * KEYBOARD SHORTCUTS HELP MODAL
