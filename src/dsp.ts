@@ -21,6 +21,7 @@ import {
 	getTiltGainAtFreq,
 	getAutoPreampEnabled,
 	getManualPreampState,
+	getLastAppliedEqName,
 } from "./fn.ts";
 import { delay, log, refreshStripUI, logTx, logRx, showSyncing, hideSyncing } from "./helpers.ts";
 import type { Band } from "./main.ts";
@@ -682,7 +683,7 @@ export async function syncToDevice() {
 		log("Sync Complete.");
 
 		// Save current profile name to device-specific key in localStorage
-		const currentName = localStorage.getItem("last_applied_eq");
+		const currentName = getLastAppliedEqName();
 		if (currentName) {
 			localStorage.setItem(`last_applied_eq_${device.vendorId}_${device.productId}`, currentName);
 		}
@@ -740,7 +741,7 @@ export async function flashToFlash() {
 		log("Saved permanently to Flash.");
 
 		// Save current profile name to device-specific key in localStorage
-		const currentName = localStorage.getItem("last_applied_eq");
+		const currentName = getLastAppliedEqName();
 		if (currentName) {
 			localStorage.setItem(`last_applied_eq_${device.vendorId}_${device.productId}`, currentName);
 		}
