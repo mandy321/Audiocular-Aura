@@ -69,6 +69,17 @@ export function getComparedEqState(): EQ | null {
 }
 (window as any).getComparedEqState = getComparedEqState;
 
+export function updateBaselineFromActive() {
+	if (slotA && slotB) {
+		if (activeSlot === "B") {
+			slotA.eqState = JSON.parse(JSON.stringify(slotB.eqState)) as EQ;
+			slotA.globalGainState = slotB.globalGainState;
+			slotA.eqName = slotB.eqName;
+		}
+	}
+}
+(window as any).updateBaselineFromActive = updateBaselineFromActive;
+
 // Focused Band Index
 let focusedBandIndex: number = -1;
 
@@ -367,6 +378,15 @@ export async function setABCompareState(state: "Off" | "A" | "B") {
 
 	if (state === "Off") {
 		if (!slotA && !slotB) return; // Already off
+
+		// Always restore Slot A's settings (the main baseline preset) when turning OFF comparison
+		if (slotA) {
+			eqState = JSON.parse(JSON.stringify(slotA.eqState)) as EQ;
+			globalGainState = slotA.globalGainState;
+			lastAppliedEqName = slotA.eqName;
+			localStorage.setItem("last_applied_eq", lastAppliedEqName);
+		}
+
 		slotA = null;
 		slotB = null;
 		activeSlot = "A";

@@ -22,6 +22,7 @@ import {
 	getAutoPreampEnabled,
 	getManualPreampState,
 	getLastAppliedEqName,
+	updateBaselineFromActive,
 } from "./fn.ts";
 import { delay, log, refreshStripUI, logTx, logRx, showSyncing, hideSyncing } from "./helpers.ts";
 import type { Band } from "./main.ts";
@@ -749,6 +750,11 @@ export async function flashToFlash() {
 		}
 
 		log("Saved permanently to Flash.");
+
+		// If A/B comparison is active, copy Slot B's settings to Slot A baseline on save
+		if (typeof updateBaselineFromActive === "function") {
+			updateBaselineFromActive();
+		}
 
 		// Save current profile name to device-specific key in localStorage
 		const currentName = getLastAppliedEqName();
