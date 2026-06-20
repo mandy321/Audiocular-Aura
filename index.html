@@ -184,9 +184,12 @@
             <button id="btnRedo" class="btn btn-secondary btn-sm" disabled aria-label="Redo last action">
               <span class="icon">↷</span> <span data-i18n="btn_redo">REDO</span>
             </button>
-            <button id="btnABCompare" class="btn btn-secondary btn-sm" aria-label="A/B Compare slots">
-              <span class="icon">⚖️</span> <span data-i18n="btn_compare">COMPARE:</span> <span id="abStateLabel">A</span>
-            </button>
+            <div class="compare-group" id="compareGroup">
+              <span class="icon" style="margin-left: 8px; margin-right: 4px; font-size: 0.9rem;">⚖️</span>
+              <button id="btnCompareOff" class="btn-segment active-off" data-i18n="compare_off">OFF</button>
+              <button id="btnCompareA" class="btn-segment" data-i18n="compare_a">SLOT A</button>
+              <button id="btnCompareB" class="btn-segment" data-i18n="compare_b">SLOT B</button>
+            </div>
             <button id="btnShortcuts" class="btn btn-secondary btn-sm" aria-label="Show Keyboard Shortcuts">
               <span class="icon">⌨️</span> <span data-i18n="btn_shortcuts">SHORTCUTS</span>
             </button>
