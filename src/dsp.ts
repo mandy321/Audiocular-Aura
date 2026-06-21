@@ -248,7 +248,7 @@ async function readMoondropParams(device: HIDDevice): Promise<{ preamp: number; 
 	log("Reading Moondrop device configuration...");
 
 	// 1. Read preamp gain
-	const gainPacket = new Uint8Array(64);
+	const gainPacket = new Uint8Array(63);
 	gainPacket[0] = CMD_MOON.READ;
 	gainPacket[1] = CMD_MOON.PRE_GAIN;
 
@@ -274,7 +274,7 @@ async function readMoondropParams(device: HIDDevice): Promise<{ preamp: number; 
 	const typeMapRev: Record<number, string> = { 1: "LSQ", 2: "PK", 3: "HSQ" };
 
 	for (let i = 0; i < 10; i++) {
-		const bandPacket = new Uint8Array(64);
+		const bandPacket = new Uint8Array(63);
 		bandPacket[0] = CMD_MOON.READ;
 		bandPacket[1] = CMD_MOON.UPDATE_EQ;
 		bandPacket[2] = 0x18;
@@ -780,7 +780,7 @@ export async function flashToFlash() {
 			logTx(2, packet);
 			await device.sendReport(2, packet);
 		} else if (protocol === "MOONDROP") {
-			const packet = new Uint8Array(64);
+			const packet = new Uint8Array(63);
 			packet[0] = CMD_MOON.WRITE;
 			packet[1] = CMD_MOON.SAVE_FLASH;
 			await device.sendReport(REPORT_ID_MOON, packet);
@@ -877,7 +877,7 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
 		const coeffs = encodeBiquadMoondrop(band.type, band.freq, gain, band.q);
 		const typeMap = { PK: 2, LSQ: 1, HSQ: 3 };
 
-		const packet = new Uint8Array(64);
+		const packet = new Uint8Array(63);
 		packet[0] = CMD_MOON.WRITE;
 		packet[1] = CMD_MOON.UPDATE_EQ;
 		packet[2] = 0x18;
@@ -906,7 +906,7 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
 		await device.sendReport(REPORT_ID_MOON, packet);
 
 		// Coefficients trigger packet
-		const enablePacket = new Uint8Array(64);
+		const enablePacket = new Uint8Array(63);
 		enablePacket[0] = CMD_MOON.WRITE;
 		enablePacket[1] = CMD_MOON.UPDATE_EQ_COEFF;
 		enablePacket[2] = band.index;
@@ -928,7 +928,7 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
 async function setGlobalGainMoondrop(device: HIDDevice, gain: number) {
 	try {
 		const val = Math.round(gain * 256);
-		const packet = new Uint8Array(64);
+		const packet = new Uint8Array(63);
 		packet[0] = CMD_MOON.WRITE;
 		packet[1] = CMD_MOON.PRE_GAIN;
 		packet[2] = 0;
