@@ -247,7 +247,9 @@ async function readMoondropParams(device: HIDDevice): Promise<{ preamp: number; 
 	let preamp = 0;
 	try {
 		const promise = waitForReport(device, CMD_MOON.READ, CMD_MOON.PRE_GAIN, undefined, 200);
+		console.debug("[Moondrop] Sending read preamp request:", gainPacket);
 		await device.sendReport(0, gainPacket);
+		console.debug("[Moondrop] Read preamp request sent.");
 		const response = await promise;
 
 		const raw = response[3] | (response[4] << 8);
@@ -364,11 +366,25 @@ export async function readDeviceParams(device: HIDDevice) {
 				renderUI(bands);
 				log("Moondrop configuration loaded successfully.");
 			} catch (err) {
-				log(`[System] Warning: Could not read current EQ from device: ${(err as Error).message}. Showing flat profile.`);
-				const flatEq = defaultEqState();
-				setEqState(flatEq);
-				setGlobalGain(0);
-				renderUI(flatEq);
+				log(`[Moondrop] Device read not supported or failed (${(err as Error).message}). Loading configuration from local storage.`);
+				// Load last saved values from localStorage
+				const savedEq = localStorage.getItem("aura_active_eq_state");
+				const savedGain = localStorage.getItem("aura_active_preamp_gain");
+				
+				let preamp = savedGain !== null ? Number(savedGain) : 0;
+				let bands = savedEq ? JSON.parse(savedEq) : defaultEqState();
+				
+				setGlobalGain(preamp);
+				setEqState(bands);
+				renderUI(bands);
+				
+				// Sync the loaded localStorage settings to the device so the device is updated
+				log("[Moondrop] Syncing local storage configuration to device...");
+				try {
+					await syncToDevice();
+				} catch (syncErr) {
+					log(`[Moondrop] Initial sync failed: ${(syncErr as Error).message}`);
+				}
 			}
 			return;
 		}
@@ -849,58 +865,72 @@ async function writeBandSavitech(device: HIDDevice, band: Band, gain: number) {
  * Write band for Moondrop devices
  */
 async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
-	const coeffs = encodeBiquadMoondrop(band.type, band.freq, gain, band.q);
-	const typeMap = { PK: 2, LSQ: 1, HSQ: 3 };
+	try {
+		const coeffs = encodeBiquadMoondrop(band.type, band.freq, gain, band.q);
+		const typeMap = { PK: 2, LSQ: 1, HSQ: 3 };
 
-	const packet = new Uint8Array(64);
-	packet[0] = CMD_MOON.WRITE;
-	packet[1] = CMD_MOON.UPDATE_EQ;
-	packet[2] = 0x18;
-	packet[3] = 0x00;
-	packet[4] = band.index;
+		const packet = new Uint8Array(64);
+		packet[0] = CMD_MOON.WRITE;
+		packet[1] = CMD_MOON.UPDATE_EQ;
+		packet[2] = 0x18;
+		packet[3] = 0x00;
+		packet[4] = band.index;
 
-	const coeffBytes = encodeToByteArray(coeffs);
-	packet.set(coeffBytes, 7);
+		const coeffBytes = encodeToByteArray(coeffs);
+		packet.set(coeffBytes, 7);
 
-	packet[27] = band.freq & 0xff;
-	packet[28] = (band.freq >> 8) & 0xff;
+		packet[27] = band.freq & 0xff;
+		packet[28] = (band.freq >> 8) & 0xff;
 
-	const qVal = Math.round(band.q * 256);
-	packet[29] = qVal & 255;
-	packet[30] = (qVal >> 8) & 255;
+		const qVal = Math.round(band.q * 256);
+		packet[29] = qVal & 255;
+		packet[30] = (qVal >> 8) & 255;
 
-	const gainVal = Math.round(gain * 256);
-	packet[31] = gainVal & 255;
-	packet[32] = (gainVal >> 8) & 255;
+		const gainVal = Math.round(gain * 256);
+		packet[31] = gainVal & 255;
+		packet[32] = (gainVal >> 8) & 255;
 
-	packet[33] = typeMap[band.type as keyof typeof typeMap] || 2;
-	packet[35] = 0;
+		packet[33] = typeMap[band.type as keyof typeof typeMap] || 2;
+		packet[35] = 0;
 
-	await device.sendReport(0, packet);
+		console.debug(`[Moondrop] Writing band ${band.index}: freq=${band.freq}, gain=${gain}, q=${band.q}`);
+		await device.sendReport(0, packet);
 
-	// Coefficients trigger packet
-	const enablePacket = new Uint8Array(64);
-	enablePacket[0] = CMD_MOON.WRITE;
-	enablePacket[1] = CMD_MOON.UPDATE_EQ_COEFF;
-	enablePacket[2] = band.index;
-	enablePacket[4] = 255;
-	enablePacket[5] = 255;
-	enablePacket[6] = 255;
-	await device.sendReport(0, enablePacket);
+		// Coefficients trigger packet
+		const enablePacket = new Uint8Array(64);
+		enablePacket[0] = CMD_MOON.WRITE;
+		enablePacket[1] = CMD_MOON.UPDATE_EQ_COEFF;
+		enablePacket[2] = band.index;
+		enablePacket[4] = 255;
+		enablePacket[5] = 255;
+		enablePacket[6] = 255;
+		await device.sendReport(0, enablePacket);
+	} catch (err) {
+		console.error(`[Moondrop] Failed to write band ${band.index}:`, err);
+		log(`[Moondrop] Write band ${band.index} failed: ${(err as Error).message}`);
+		throw err;
+	}
 }
 
 /**
  * Set Moondrop global gain
  */
 async function setGlobalGainMoondrop(device: HIDDevice, gain: number) {
-	const val = Math.round(gain * 256);
-	const packet = new Uint8Array(64);
-	packet[0] = CMD_MOON.WRITE;
-	packet[1] = CMD_MOON.PRE_GAIN;
-	packet[2] = 0;
-	packet[3] = val & 255;
-	packet[4] = (val >> 8) & 255;
-	await device.sendReport(0, packet);
+	try {
+		const val = Math.round(gain * 256);
+		const packet = new Uint8Array(64);
+		packet[0] = CMD_MOON.WRITE;
+		packet[1] = CMD_MOON.PRE_GAIN;
+		packet[2] = 0;
+		packet[3] = val & 255;
+		packet[4] = (val >> 8) & 255;
+		console.debug(`[Moondrop] Writing global gain: ${gain} dB`);
+		await device.sendReport(0, packet);
+	} catch (err) {
+		console.error(`[Moondrop] Failed to write global gain:`, err);
+		log(`[Moondrop] Write global gain failed: ${(err as Error).message}`);
+		throw err;
+	}
 }
 
 /**
