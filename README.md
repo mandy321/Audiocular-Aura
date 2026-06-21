@@ -56,6 +56,9 @@ AuraPEQ features a multi-protocol hardware communication layer that automaticall
 | **FiiO** | 0.1 dB steps | FiiO BTR17, KA17, KA15, KB1, etc. |
 | **FiiO JA11 (KT02H20)** | 0.1 dB steps | FiiO JadeAudio JA11 (5-band configuration) |
 
+> [!NOTE]
+> **Moondrop Protocol Notes:** Since Moondrop devices rely on host-side coefficient calculations, A/B comparison level-matching is bypassed automatically to prevent gain packet corruption. A/B comparison switches active slots normally.
+
 ---
 
 ## 🛠️ Quick Start (Local Development)
