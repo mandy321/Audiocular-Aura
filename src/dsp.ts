@@ -148,15 +148,22 @@ export async function setDeviceGlobalGain(gain: number, skipBandSync = false) {
 	const device = getDevice();
 	if (!device) return;
 
-	// Level matching for A/B Comparison to prevent volume jumps
+	const protocol = getProtocol(device);
+
+	// Moondrop uses host-side coefficient calculation; A/B level-matching would corrupt the gain value.
 	let appliedGain = gain;
-	if (typeof (window as any).isCompareActive === "function" && (window as any).isCompareActive()) {
-		const gA = (window as any).getSlotAGain?.() ?? 0;
-		const gB = (window as any).getSlotBGain?.() ?? 0;
-		appliedGain = Math.min(gA, gB);
+	if (protocol !== "MOONDROP") {
+		if (typeof (window as any).isCompareActive === "function" && (window as any).isCompareActive()) {
+			const gA = (window as any).getSlotAGain?.() ?? 0;
+			const gB = (window as any).getSlotBGain?.() ?? 0;
+			appliedGain = Math.min(gA, gB);
+		}
+	} else {
+		// Moondrop hardware range is -20 to +10 dB
+		appliedGain = Math.max(-20, Math.min(10, appliedGain));
 	}
 
-	const protocol = getProtocol(device);
+	console.debug(`[DEBUG] setDeviceGlobalGain: protocol=${protocol}, raw=${gain}, applied=${appliedGain}`);
 
 	if (protocol === "FIIO") {
 		await setGlobalGainFiio(device, appliedGain);
@@ -668,7 +675,22 @@ export async function syncToDevice() {
 	showSyncing();
 	try {
 		const protocol = getProtocol(device);
+		console.debug(`[DEBUG] syncToDevice: Starting sync with protocol=${protocol}`);
 		log(`Syncing via protocol: ${protocol}...`);
+
+		// Moondrop: use dedicated sync path
+		if (protocol === "MOONDROP") {
+			// Write all bands sequentially (including disabled ones) using Moondrop's coefficient-based writes
+			for (const band of eqState) {
+				await writeBand(device, band, "MOONDROP");
+				await delay(30);
+			}
+			// Write gain without A/B modifications
+			await setDeviceGlobalGain(getGlobalGainState(), true);
+			console.debug("[DEBUG] syncToDevice: Moondrop dedicated sync path completed.");
+			log("Sync Complete.");
+			return;
+		}
 
 		// 1. Write Global Preamp Gain (skip band sync since we write them below)
 		await setDeviceGlobalGain(getGlobalGainState(), true);

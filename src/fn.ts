@@ -371,6 +371,16 @@ export function initSlots() {
 }
 
 export async function setABCompareState(state: "Off" | "A" | "B") {
+	const protocol = device ? getProtocol(device) : null;
+
+	// Moondrop uses host-side coefficient calculation; A/B baseline updates and device sync are bypassed to prevent memory corruption.
+	if (protocol === "MOONDROP" && state !== "Off") {
+		activeSlot = state;
+		log("A/B comparison active (level-matching is disabled for Moondrop devices to prevent gain corruption)");
+		updateSlotLabel();
+		return;
+	}
+
 	const current = {
 		eqState: JSON.parse(JSON.stringify(eqState)) as EQ,
 		globalGainState: globalGainState
@@ -747,6 +757,9 @@ export async function connectToDevice() {
 		const dev = devices.find(d =>
 			d.collections && d.collections.some(c => c.usagePage !== undefined && c.usagePage >= 0xff00 && c.usagePage <= 0xffff)
 		) || devices[0];
+
+		console.debug(`[DEBUG] connectToDevice: selected device collections:`, dev.collections?.map(c => `UsagePage: 0x${c.usagePage?.toString(16)}, Usage: 0x${c.usage?.toString(16)}`));
+
 		device = dev;
 		(window as any).device = dev;
 		await dev.open();
@@ -791,6 +804,11 @@ export async function connectToDevice() {
 
 		// Identify DAC automatically
 		identifyConnectedDac(dev);
+
+		// Reset A/B state on Moondrop connection to avoid corrupted state from previous sessions
+		if (getProtocol(dev) === "MOONDROP") {
+			await setABCompareState("Off");
+		}
 
 		// Update UI elements for connection state
 		const statusBadge = document.getElementById("statusBadge");
@@ -841,12 +859,18 @@ export async function connectToDevice() {
  */
 export async function disconnectDevice() {
 	if (!device) return;
+	const protocol = getProtocol(device);
 	try {
 		log(`Disconnecting from: ${device.productName || "DAC"}`);
 		await device.close();
 	} catch (err) {
 		log(`Disconnection Error: ${(err as Error).message}`);
 	} finally {
+		if (protocol === "MOONDROP") {
+			await setABCompareState("Off");
+			console.debug("[DEBUG] A/B state reset to Off on Moondrop disconnect");
+		}
+
 		device = null;
 		(window as any).device = null;
 
