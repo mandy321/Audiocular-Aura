@@ -54,6 +54,26 @@ function getMoondropPacketSize(device: HIDDevice): number {
 	return 63;
 }
 
+/**
+ * Send a report to a Moondrop device.
+ * Attempts sendReport first, and falls back to sendFeatureReport if it fails.
+ */
+async function sendMoondropReport(device: HIDDevice, reportId: number, packet: Uint8Array) {
+	try {
+		await device.sendReport(reportId, packet);
+	} catch (err) {
+		const errMsg = (err as Error).message || "";
+		console.warn(`[Moondrop TX] sendReport failed: ${errMsg}. Retrying via sendFeatureReport...`);
+		try {
+			await device.sendFeatureReport(reportId, packet);
+		} catch (featErr) {
+			console.error(`[Moondrop TX] sendFeatureReport also failed:`, featErr);
+			throw featErr;
+		}
+	}
+}
+
+
 const REV_TYPE_MAP_JA11: Record<number, string> = { 0: "PK", 1: "LSQ", 2: "HSQ" };
 
 /**
@@ -276,7 +296,7 @@ async function readMoondropParams(device: HIDDevice): Promise<{ preamp: number; 
 	try {
 		const promise = waitForReport(device, CMD_MOON.READ, CMD_MOON.PRE_GAIN, undefined, 200);
 		console.debug("[Moondrop] Sending read preamp request:", gainPacket);
-		await device.sendReport(REPORT_ID_MOON, gainPacket);
+		await sendMoondropReport(device, REPORT_ID_MOON, gainPacket);
 		console.debug("[Moondrop] Read preamp request sent.");
 		const response = await promise;
 
@@ -304,7 +324,7 @@ async function readMoondropParams(device: HIDDevice): Promise<{ preamp: number; 
 
 		try {
 			const promise = waitForReport(device, CMD_MOON.READ, CMD_MOON.UPDATE_EQ, i, 200);
-			await device.sendReport(REPORT_ID_MOON, bandPacket);
+			await sendMoondropReport(device, REPORT_ID_MOON, bandPacket);
 			const response = await promise;
 
 			let freq = response[27] | (response[28] << 8);
@@ -816,7 +836,7 @@ export async function flashToFlash() {
 			const packet = new Uint8Array(getMoondropPacketSize(device));
 			packet[0] = CMD_MOON.WRITE;
 			packet[1] = CMD_MOON.SAVE_FLASH;
-			await device.sendReport(REPORT_ID_MOON, packet);
+			await sendMoondropReport(device, REPORT_ID_MOON, packet);
 		} else {
 			// Savitech Flash Save
 			await sendPacketSavitech(device, [
@@ -936,7 +956,7 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
 
 		console.debug(`[Moondrop] Writing band ${band.index}: freq=${band.freq}, gain=${gain}, q=${band.q}`);
 		logTx(REPORT_ID_MOON, packet);
-		await device.sendReport(REPORT_ID_MOON, packet);
+		await sendMoondropReport(device, REPORT_ID_MOON, packet);
 
 		// Coefficients trigger packet
 		const enablePacket = new Uint8Array(getMoondropPacketSize(device));
@@ -947,7 +967,7 @@ async function writeBandMoondrop(device: HIDDevice, band: Band, gain: number) {
 		enablePacket[5] = 255;
 		enablePacket[6] = 255;
 		logTx(REPORT_ID_MOON, enablePacket);
-		await device.sendReport(REPORT_ID_MOON, enablePacket);
+		await sendMoondropReport(device, REPORT_ID_MOON, enablePacket);
 	} catch (err) {
 		console.error(`[Moondrop] Failed to write band ${band.index}:`, err);
 		log(`[Moondrop] Write band ${band.index} failed: ${(err as Error).message}`);
@@ -969,7 +989,7 @@ async function setGlobalGainMoondrop(device: HIDDevice, gain: number) {
 		packet[4] = (val >> 8) & 255;
 		console.debug(`[Moondrop] Writing global gain: ${gain} dB`);
 		logTx(REPORT_ID_MOON, packet);
-		await device.sendReport(REPORT_ID_MOON, packet);
+		await sendMoondropReport(device, REPORT_ID_MOON, packet);
 	} catch (err) {
 		console.error(`[Moondrop] Failed to write global gain:`, err);
 		log(`[Moondrop] Write global gain failed: ${(err as Error).message}`);
