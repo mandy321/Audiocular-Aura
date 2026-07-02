@@ -1098,7 +1098,7 @@ function encodeBiquadConexantForRate(type: string, freq: number, gain: number, q
  * Packs a Conexant transaction into a little-endian 32-bit packet array.
  */
 function buildConexantPacket(commandId: number, data: number[]): Uint8Array {
-	const packet = new Uint8Array(62);
+	const packet = new Uint8Array(61);
 	packet[0] = 1; // Report ID = 1
 	packet[1] = 1 & 0xff; // transaction ID low
 	packet[2] = (1 >> 8) & 0xff; // transaction ID high
