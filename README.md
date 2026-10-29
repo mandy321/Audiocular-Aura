@@ -54,18 +54,35 @@ AuraPEQ features a multi-protocol hardware communication layer that automaticall
 
 | Protocol | Preamp Precision | Officially Supported DAC Models |
 | :--- | :--- | :--- |
-| **Savitech (Walkplay)** | 1.0 dB steps | Audiocular Aura (CB5100), Fosi Audio DS2, JCally JM20/JM20 Pro, TRN Black Pearl |
+| **Savitech (Walkplay)** | 1.0 dB steps | Audiocular Aura Pro (CS43198 + SGM8262), Audiocular Aura (CS43131), Fosi Audio DS2, JCally JM20/JM20 Pro, TRN Black Pearl |
 | **Moondrop / Comtrue** | 0.1 dB steps | Moondrop Dawn Pro/Dawn Pro 2, May, Tanchjim Space Lite |
 | **Conexant (Freeman)** | 0.1 dB steps | Moondrop FreeDSP (9-band configuration) |
 | **FiiO** | 0.1 dB steps | FiiO BTR17, KA17, KA15, KB1, etc. |
 | **FiiO JA11 (KT02H20)** | 0.1 dB steps | FiiO JadeAudio JA11 (5-band configuration) |
 
 > [!NOTE]
+> **Audiocular Aura Pro (VID `0x3302`, PID `0x4317`):** Features Cirrus Logic CS43198 MasterHIFI DAC paired with a dedicated SGM8262 dual amplifier (delivering up to 235mW @ 32Ω, PCM 384kHz/32-bit, and native DSD256). Communicates over Savitech CB5100 series protocol via Report ID `0x4B` with hardware PEQ, Class H/AB amp switching, output gain modes, and 5 digital interpolation filter selections (`FAST-LL`, `FAST-PC`, `Slow-LL`, `Slow-PC`, `NON-OS`).
+>
 > **Moondrop / Conexant Protocol Notes:** Since Moondrop and Conexant devices rely on host-side coefficient calculations, A/B comparison level-matching is bypassed automatically to prevent gain packet corruption. A/B comparison switches active slots normally.
 >
 > **Dawn Pro 2 (VID `0x35D8`, PID `0x011D`):** All HID read/write operations (EQ bands, preamp gain, flash save) use Report ID `0x4B` — the same as Comtrue CT7601-based devices. The payload size must be restricted to exactly 63 bytes.
 >
 > **FreeDSP (VID `0x35D8`, PID `0x1496`):** Powered by a Conexant (Freeman) DSP core. The application automatically renders a custom 9-band PEQ layout and communicates via Conexant's modular `Caf` package format. Coefficient updates are scaled using Q22 fixed-point math (`2^22`) and pushed to the DSP RAM (command `190`) for instant real-time tuning, or saved permanently to Flash (command `220` + commit sequence).
+
+### 🐧 Linux WebHID Setup (Permissions)
+
+On Linux distributions (Arch, Ubuntu, Debian, Fedora), WebHID requires read/write permissions to `/dev/hidraw*`. If your browser reports that the device cannot be opened, install the udev rule:
+
+```bash
+# /etc/udev/rules.d/99-aura-peq.rules
+KERNEL=="hidraw*", ATTRS{idVendor}=="3302", MODE="0666", GROUP="plugdev", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTR{idVendor}=="3302", MODE="0666", GROUP="plugdev", TAG+="uaccess"
+```
+
+Reload udev rules and re-plug the DAC:
+```bash
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
 
 Please do not use for JM98 MAX 2 , JM98 MAX (Cirrus Logic chips as it can cause irreversible problems in these devices)
 ---

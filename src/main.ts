@@ -1012,15 +1012,30 @@ async function fetchRemoteDatabase(force = false): Promise<IdentifiedDac[] | nul
 }
 
 function mergeDacLists(local: IdentifiedDac[], remote: IdentifiedDac[]): IdentifiedDac[] {
-	const merged = [...remote];
+	const merged: IdentifiedDac[] = [];
+
+	// Add local definitions first (preserves local updates & custom models)
 	for (const localDac of local) {
-		const exists = remote.some(
-			(r) => r.vid === localDac.vid && r.pid === localDac.pid
+		merged.push(localDac);
+	}
+
+	// Add remote definitions that do not collide with local definitions
+	for (const remoteDac of remote) {
+		const exists = merged.some(
+			(m) => m.vid === remoteDac.vid && m.pid === remoteDac.pid
 		);
 		if (!exists) {
-			merged.push(localDac);
+			merged.push(remoteDac);
 		}
 	}
+
+	// Ensure specific PID entries always precede wildcard entries (pid === undefined)
+	merged.sort((a, b) => {
+		if (a.pid !== undefined && b.pid === undefined) return -1;
+		if (a.pid === undefined && b.pid !== undefined) return 1;
+		return 0;
+	});
+
 	return merged;
 }
 

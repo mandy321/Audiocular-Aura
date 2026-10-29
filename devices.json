@@ -1,6 +1,14 @@
 [
   {
     "vid": 13058,
+    "pid": 17175,
+    "name": "Audiocular Aura Pro",
+    "chipset": "Cirrus Logic CS43198 + SGM8262 Dual Amp",
+    "protocol": "SAVITECH",
+    "description": "Flagship portable DAC with CS43198 MasterHIFI, dual SGM8262 amp (235mW @ 32Ω), and 10-band zero-latency hardware PEQ."
+  },
+  {
+    "vid": 13058,
     "pid": 17384,
     "name": "TRN Black Pearl",
     "chipset": "Savitech CB5100 + CS43131",

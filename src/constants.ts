@@ -16,6 +16,7 @@ export const VID_FIIO = 0x2972;               // FiiO (JA11, KA17, etc.)
 export const VID_AUDIOCULAR = 0x3302;         // TTGK Technology / Audiocular Aura
 export const VID_JKALLY_KTMICRO = 0x31b2;     // JKALLY (KT02H20 HIFI Audio)
 export const PID_TRN_BLACK_PEARL = 0x43e8;    // TRN Black Pearl PID
+export const PID_AUDIOCULAR_AURA_PRO = 0x4317; // Kart / Audiocular Aura Pro (CS43198 + SGM8262)
 
 // --- WALKPLAY (SAVITECH) COMMANDS ---
 export const CMD_SAVI = {
@@ -80,6 +81,14 @@ export interface IdentifiedDac {
 }
 
 export const KNOWN_DACS: IdentifiedDac[] = [
+	{
+		vid: VID_AUDIOCULAR,
+		pid: PID_AUDIOCULAR_AURA_PRO,
+		name: "Audiocular Aura Pro",
+		chipset: "Cirrus Logic CS43198 + SGM8262 Dual Amp",
+		protocol: "SAVITECH",
+		description: "Flagship portable DAC with CS43198 MasterHIFI, dual SGM8262 amp (235mW @ 32Ω), and 10-band zero-latency hardware PEQ.",
+	},
 	{
 		vid: VID_AUDIOCULAR,
 		pid: PID_TRN_BLACK_PEARL,
