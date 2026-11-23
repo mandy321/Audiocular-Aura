@@ -89,12 +89,10 @@ const REV_TYPE_MAP_JA11: Record<number, string> = { 0: "PK", 1: "LSQ", 2: "HSQ" 
  * DETECT PROTOCOL BASED ON VENDOR ID AND DATABASE
  */
 export function getProtocol(device: HIDDevice) {
-	// 1. Check merged active database
-	const match = activeDacs.find(
-		(d) =>
-			d.vid === device.vendorId &&
-			(d.pid === undefined || d.pid === device.productId)
-	);
+	// 1. Check merged active database: prioritize exact VID + PID match first
+	const match =
+		activeDacs.find((d) => d.vid === device.vendorId && d.pid === device.productId) ||
+		activeDacs.find((d) => d.vid === device.vendorId && d.pid === undefined);
 	if (match) return match.protocol;
 
 	// 2. Check stored custom USB override
