@@ -1,3 +1,4 @@
+import { trackEvent } from "./analytics.ts";
 import {
 	DEFAULT_FREQS,
 	DEFAULT_LABELS,
@@ -773,6 +774,14 @@ export async function connectToDevice() {
 		const unknownSuffix = isKnown ? "" : " [Unknown device]";
 		log(`[System] Connected: ${dev.productName || "Unknown DAC"} (VID: 0x${vidStr}, PID: 0x${pidStr})${unknownSuffix}`);
 
+		// Track DAC connection event
+		trackEvent("dac_connected", {
+			device_name: dev.productName || "Unknown DAC",
+			vendor_id: `0x${vidStr}`,
+			product_id: `0x${pidStr}`,
+			is_known_device: isKnown
+		});
+
 		// Persist Custom USB Options if they were used
 		let usedCustom = false;
 		let customVidValue = "";
@@ -1080,6 +1089,14 @@ export async function autoConnectDevice() {
 		);
 		const unknownSuffix = isKnown ? "" : " [Unknown device]";
 		log(`[System] Connected: ${dev.productName || "Unknown DAC"} (VID: 0x${vidStr}, PID: 0x${pidStr})${unknownSuffix}`);
+
+		// Track DAC connection event
+		trackEvent("dac_connected", {
+			device_name: dev.productName || "Unknown DAC",
+			vendor_id: `0x${vidStr}`,
+			product_id: `0x${pidStr}`,
+			is_known_device: isKnown
+		});
 
 		adjustBandsForDevice(dev);
 		identifyConnectedDac(dev);

@@ -1,5 +1,6 @@
 import { loadProfileFromText } from "./importExport.ts";
 import { log } from "./helpers.ts";
+import { trackEvent } from "./analytics.ts";
 
 export interface AutoEqPreset {
 	path: string;
@@ -137,6 +138,11 @@ export async function loadPreset(preset: AutoEqPreset) {
 
 		const text = await response.text();
 		await loadProfileFromText(text, preset.name);
+
+		// Track preset applied
+		trackEvent("preset_applied", {
+			preset_name: preset.name
+		});
 	} catch (err) {
 		log(`Error downloading preset: ${(err as Error).message}`);
 	}
