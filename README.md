@@ -180,3 +180,6 @@ If you are looking for resources on equalizers or DAC configuration, this projec
 ## 🛡️ License
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the [LICENSE](LICENSE) file for details.
+
+
+<img src="https://us.i.posthog.com/e/?data=eyJhcGlfa2V5IjogInBoY194UHhnd3VQZTJGRDdkVjRtSllTQmVWYnpiaWN2RjNLTVJ4YjJ6NkJFVVpDWiIsICJldmVudCI6ICJnaXRodWJfcGFnZV92aWV3IiwgImRpc3RpbmN0X2lkIjogImdpdGh1Yl9hdWRpb2N1bGFyX3Zpc2l0b3IiLCAicHJvcGVydGllcyI6IHsiYXBwX25hbWUiOiAiYXVkaW9jdWxhcl9hdXJhIiwgInBhZ2VfdHlwZSI6ICJyZWFkbWUiLCAicmVwbyI6ICJtYW5keTMyMS9BdWRpb2N1bGFyLUF1cmEifX0=" width="1" height="1" alt="" />
